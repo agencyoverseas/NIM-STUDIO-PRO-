@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NIM Studio Pro — Claude · FLUX · Kling · Sora</title>
+<meta name="description" content="Le meilleur studio IA en un seul abonnement. Claude, FLUX, Kling, Sora. Installe-le sur ton téléphone en 1 tap.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#08090F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NIM Pro">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--g:#7ED8B4;--gl:#A8EDCD;--bg:#000;--s:#0d0d0d;--s2:#161616;--s3:#1f1f1f;--bdr:#222;--muted:#555;--txt:#e8e8e8;--white:#fff;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+nav{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;backdrop-filter:blur(20px);background:rgba(0,0,0,.85);border-bottom:1px solid var(--bdr);}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-badge{background:var(--g);color:#000;font-weight:900;font-size:14px;padding:5px 11px;border-radius:7px;}
+.nav-name{font-size:15px;font-weight:800;color:var(--white);letter-spacing:-.3px;}
+.nav-name span{color:var(--g);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-login{color:var(--muted);font-size:14px;font-weight:600;text-decoration:none;transition:color .2s;}
+.nav-login:hover{color:var(--white);}
+.nav-cta{background:var(--g);color:#000;font-weight:700;font-size:13px;padding:9px 20px;border-radius:8px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;}
+.nav-cta:hover{background:var(--gl);}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden;}
+.hero-glow{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(126,216,180,.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(126,216,180,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(126,216,180,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);}
+.pill{display:inline-flex;align-items:center;gap:7px;background:rgba(126,216,180,.1);border:1px solid rgba(126,216,180,.3);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--gl);margin-bottom:28px;letter-spacing:.5px;text-transform:uppercase;animation:fu .6s ease both;}
+.pill-dot{width:6px;height:6px;background:var(--g);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
+h1{font-family:'Instrument Serif',serif;font-size:clamp(42px,8vw,90px);line-height:1.05;letter-spacing:-2px;color:var(--white);margin-bottom:24px;animation:fu .6s .1s ease both;max-width:820px;}
+h1 em{font-style:italic;color:var(--g);}
+.hero-sub{font-size:clamp(15px,2.5vw,19px);color:var(--muted);max-width:500px;line-height:1.65;margin-bottom:44px;animation:fu .6s .2s ease both;font-weight:300;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:fu .6s .3s ease both;}
+.btn-primary{background:var(--g);color:#000;font-weight:800;font-size:16px;padding:16px 32px;border-radius:12px;border:none;cursor:pointer;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary:hover{background:var(--gl);transform:translateY(-2px);box-shadow:0 12px 40px rgba(126,216,180,.3);}
+.btn-ghost{background:transparent;color:var(--txt);font-weight:600;font-size:15px;padding:16px 28px;border-radius:12px;border:1px solid var(--bdr);cursor:pointer;text-decoration:none;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--g);color:var(--g);}
+.hero-stats{display:flex;gap:40px;margin-top:60px;padding-top:40px;border-top:1px solid var(--bdr);animation:fu .6s .4s ease both;flex-wrap:wrap;justify-content:center;}
+.stat{text-align:center;}
+.stat-num{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--g);display:block;}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+@keyframes fu{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.marquee-section{overflow:hidden;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:var(--s);}
+.marquee-track{display:flex;animation:marquee 25s linear infinite;width:max-content;}
+.marquee-item{display:flex;align-items:center;gap:10px;padding:13px 28px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);border-right:1px solid var(--bdr);white-space:nowrap;}
+.marquee-item span{color:var(--g);font-weight:500;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.section{padding:100px 24px;max-width:1100px;margin:0 auto;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--g);margin-bottom:14px;}
+.section-title{font-family:'Instrument Serif',serif;font-size:clamp(30px,5vw,52px);letter-spacing:-1.5px;color:var(--white);margin-bottom:56px;line-height:1.1;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:16px;overflow:hidden;}
+.feature-card{background:var(--s);padding:32px;transition:background .2s;}
+.feature-card:hover{background:var(--s2);}
+.feature-icon{width:44px;height:44px;background:rgba(126,216,180,.1);border:1px solid rgba(126,216,180,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;}
+.feature-card h3{font-size:16px;font-weight:700;color:var(--white);margin-bottom:8px;letter-spacing:-.3px;}
+.feature-card p{font-size:13px;color:var(--muted);line-height:1.6;}
+#pricing{padding:100px 24px;background:var(--s);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);}
+.pricing-inner{max-width:860px;margin:0 auto;text-align:center;}
+.pricing-toggle{display:inline-flex;background:var(--s2);border:1px solid var(--bdr);border-radius:100px;padding:4px;margin-bottom:44px;}
+.toggle-btn{padding:8px 22px;border-radius:100px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;transition:all .2s;background:transparent;color:var(--muted);}
+.toggle-btn.active{background:var(--g);color:#000;}
+.save-badge{display:inline-block;background:rgba(126,216,180,.15);border:1px solid rgba(126,216,180,.3);color:var(--g);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:6px;text-transform:uppercase;}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.plans{grid-template-columns:1fr;}}
+.plan{background:var(--s2);border:1px solid var(--bdr);border-radius:20px;padding:36px 28px;text-align:left;position:relative;overflow:hidden;transition:border-color .2s;}
+.plan.featured{border-color:var(--g);background:linear-gradient(135deg,rgba(126,216,180,.06) 0%,var(--s2) 100%);}
+.plan.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);}
+.plan-badge{display:inline-block;background:var(--g);color:#000;font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:20px;}
+.plan-name{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;}
+.plan-price{display:flex;align-items:baseline;gap:3px;margin-bottom:4px;}
+.price-cur{font-size:22px;color:var(--muted);font-weight:300;margin-top:8px;align-self:flex-start;}
+.price-amount{font-family:'Instrument Serif',serif;font-size:56px;color:var(--white);line-height:1;}
+.price-note{font-family:'DM Mono',monospace;font-size:11px;color:var(--g);margin-bottom:24px;}
+.plan-desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+.plan-features{list-style:none;margin-bottom:28px;display:flex;flex-direction:column;gap:11px;}
+.plan-features li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--txt);}
+.chk{width:20px;height:20px;background:rgba(126,216,180,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--g);font-size:10px;}
+.plan-btn{width:100%;padding:14px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:block;text-align:center;}
+.plan-btn.primary{background:var(--g);color:#000;}
+.plan-btn.primary:hover{background:var(--gl);transform:translateY(-1px);box-shadow:0 8px 24px rgba(126,216,180,.3);}
+.plan-btn.secondary{background:transparent;color:var(--txt);border:1px solid var(--bdr);}
+.plan-btn.secondary:hover{border-color:var(--g);color:var(--g);}
+.faq-list{max-width:680px;}
+.faq-item{background:var(--s);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.faq-q{width:100%;background:none;border:none;color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;padding:18px 20px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.faq-q:hover{color:var(--g);}
+.faq-arrow{font-size:11px;color:var(--muted);transition:transform .3s;flex-shrink:0;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s;padding:0 20px;font-size:14px;color:var(--muted);line-height:1.7;}
+.faq-item.open .faq-a{max-height:220px;padding:0 20px 18px;}
+footer{border-top:1px solid var(--bdr);padding:40px 24px;text-align:center;color:var(--muted);font-size:13px;}
+footer a{color:var(--g);text-decoration:none;}
+
+/* ── INSTALL POPUP ── */
+.inst-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(14px);align-items:flex-end;justify-content:center;}
+.inst-overlay.open{display:flex;}
+.inst-sheet{background:#0F1018;border:1px solid #2C2F3E;border-bottom:none;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:12px 24px 32px;padding-bottom:max(32px,env(safe-area-inset-bottom));animation:sU .35s cubic-bezier(.34,1.1,.64,1);}
+@keyframes sU{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.inst-handle{width:40px;height:4px;background:#2C2F3E;border-radius:2px;margin:0 auto 20px;}
+.inst-logo-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.inst-logo{width:56px;height:56px;background:linear-gradient(135deg,#7ED8B4,#4BB896);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 30px rgba(126,216,180,.25);}
+.inst-app-name{font-size:20px;font-weight:800;color:#F0F2FF;letter-spacing:-.3px;}
+.inst-app-name span{color:#7ED8B4;}
+.inst-app-sub{font-size:12px;color:#6B7099;margin-top:2px;}
+.inst-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.inst-pill{background:#171924;border:1px solid #2C2F3E;border-radius:100px;padding:5px 12px;font-size:11px;color:#A8EDCD;font-family:'DM Mono',monospace;}
+.ios-guide{display:none;background:#171924;border:1px solid #2C2F3E;border-radius:14px;padding:16px;margin-bottom:12px;}
+.ios-guide.show{display:block;}
+.ios-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.ios-step:last-child{border-bottom:none;}
+.ios-n{width:24px;height:24px;border-radius:50%;background:#7ED8B4;color:#000;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ios-t{font-size:13px;color:#F0F2FF;line-height:1.5;flex:1;}
+.ios-t b{color:#7ED8B4;}
+.inst-btn{width:100%;background:#7ED8B4;color:#000;border:none;font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;padding:17px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:10px;box-shadow:0 6px 30px rgba(126,216,180,.3);animation:pg 2.5s 1s ease-in-out infinite;}
+@keyframes pg{0%,100%{box-shadow:0 6px 30px rgba(126,216,180,.3);}50%{box-shadow:0 6px 50px rgba(126,216,180,.55);}}
+.inst-btn:active{transform:scale(.97);}
+.inst-btn:disabled{opacity:.6;cursor:not-allowed;}
+.inst-skip{width:100%;background:transparent;color:#6B7099;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px;cursor:pointer;}
+.inst-prog{height:3px;background:#2C2F3E;border-radius:2px;overflow:hidden;margin:12px 0 4px;}
+.inst-prog-fill{height:100%;background:linear-gradient(90deg,#7ED8B4,#A8EDCD);border-radius:2px;width:0%;transition:width .4s;}
+.inst-prog-lbl{font-family:'DM Mono',monospace;font-size:10px;color:#6B7099;text-align:center;}
+.inst-done{text-align:center;padding:8px 0 16px;}
+.inst-done-ico{font-size:40px;margin-bottom:10px;}
+.inst-done-title{font-size:18px;font-weight:800;color:#7ED8B4;margin-bottom:6px;}
+.inst-done-sub{font-size:13px;color:#6B7099;line-height:1.5;}
+
+/* CHECKOUT */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);z-index:300;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--bdr);border-radius:20px;padding:36px 28px;width:100%;max-width:440px;animation:mIn .3s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(16px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.modal-title{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-.5px;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+.modal-close:hover{color:var(--white);}
+.modal-summary{background:rgba(126,216,180,.08);border:1px solid rgba(126,216,180,.2);border-radius:10px;padding:16px;margin-bottom:20px;}
+.modal-plan{font-size:12px;color:var(--muted);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.modal-price{font-size:26px;font-weight:800;color:var(--g);font-family:'DM Mono',monospace;}
+.modal-feats{list-style:none;margin-bottom:20px;display:flex;flex-direction:column;gap:8px;}
+.modal-feats li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--txt);}
+.stripe-note{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
+.stripe-note a{color:var(--g);}
+@media(max-width:768px){nav{padding:12px 16px;}.section{padding:60px 20px;}#pricing{padding:60px 20px;}.hero-stats{gap:24px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#"><div class="nav-badge">N</div><div class="nav-name">NIM Studio <span>Pro</span></div></a>
+  <div class="nav-right">
+    <a class="nav-login" href="app.html">Se connecter</a>
+    <a class="nav-cta" href="#pricing">Commencer →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div><div class="hero-grid"></div>
+  <div class="pill"><div class="pill-dot"></div>Claude · FLUX · Kling · Sora · Veo</div>
+  <h1>Le meilleur studio IA.<br><em>Un seul abonnement.</em></h1>
+  <p class="hero-sub">Claude pour écrire. FLUX pour les images. Kling, Sora et Veo pour les vidéos. Tout dans une seule app mobile, sans App Store.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="openInstall()">📲 Installer l'app — Gratuit</button>
+    <a href="#pricing" class="btn-ghost">Voir les plans →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">12+</span><span class="stat-label">Modèles IA</span></div>
+    <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Requêtes Pro</span></div>
+    <div class="stat"><span class="stat-num">0€</span><span class="stat-label">Pour commencer</span></div>
+    <div class="stat"><span class="stat-num">PWA</span><span class="stat-label">Sans App Store</span></div>
+  </div>
+</section>
+
+<div class="marquee-section"><div class="marquee-track">
+  <div class="marquee-item"><span>CLAUDE</span>Opus 4.6 · Sonnet 4.6</div>
+  <div class="marquee-item"><span>FLUX</span>2 Pro Ultra · 4K</div>
+  <div class="marquee-item"><span>KLING</span>2.6 Pro · 3.0 Pro</div>
+  <div class="marquee-item"><span>SORA</span>2 · Sora 2 Pro</div>
+  <div class="marquee-item"><span>VEO</span>3.1 Fast · Google</div>
+  <div class="marquee-item"><span>RUNWAY</span>Gen-4 Turbo</div>
+  <div class="marquee-item"><span>GEMINI</span>2.5 Pro · Flash</div>
+  <div class="marquee-item"><span>IDEOGRAM</span>V3 Quality</div>
+  <div class="marquee-item"><span>CLAUDE</span>Opus 4.6 · Sonnet 4.6</div>
+  <div class="marquee-item"><span>FLUX</span>2 Pro Ultra · 4K</div>
+  <div class="marquee-item"><span>KLING</span>2.6 Pro · 3.0 Pro</div>
+  <div class="marquee-item"><span>SORA</span>2 · Sora 2 Pro</div>
+  <div class="marquee-item"><span>VEO</span>3.1 Fast · Google</div>
+  <div class="marquee-item"><span>RUNWAY</span>Gen-4 Turbo</div>
+  <div class="marquee-item"><span>GEMINI</span>2.5 Pro · Flash</div>
+  <div class="marquee-item"><span>IDEOGRAM</span>V3 Quality</div>
+</div></div>
+
+<section class="section" id="features">
+  <div class="section-label">Fonctionnalités</div>
+  <div class="section-title">Tout l'arsenal IA.<br>Une seule interface.</div>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">🤖</div><h3>Claude Opus 4.6</h3><p>Le meilleur LLM au monde pour écrire, coder, analyser. Illimité en Pro.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎨</div><h3>FLUX.2 Ultra 4K</h3><p>Images photoréalistes en 8 secondes. Ideogram pour le texte intégré.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎬</div><h3>Kling · Sora 2 · Veo 3.1</h3><p>Vidéos cinématiques jusqu'à 60 secondes. Audio natif Sora 2.</p></div>
+    <div class="feature-card"><div class="feature-icon">📱</div><h3>Installable sans store</h3><p>1 tap Android ou iPhone. Icône sur l'écran d'accueil, fonctionne hors ligne.</p></div>
+    <div class="feature-card"><div class="feature-icon">✂️</div><h3>Découpe vidéo auto</h3><p>Génère une longue vidéo → découpe automatique en clips selon tes besoins.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔑</div><h3>Interface Admin</h3><p>Gère tes clés API fal.ai et Anthropic directement dans l'app, en sécurité.</p></div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label" style="text-align:center;">Tarifs</div>
+    <div class="section-title" style="margin-bottom:28px;">Simple. Sans surprise.</div>
+    <div class="pricing-toggle">
+      <button class="toggle-btn active" id="btn-monthly" onclick="setPlan('monthly')">Mensuel</button>
+      <button class="toggle-btn" id="btn-annual" onclick="setPlan('annual')">Annuel <span class="save-badge">-2 mois</span></button>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Découverte</div>
+        <div class="plan-price"><span class="price-cur">€</span><span class="price-amount">0</span></div>
+        <div class="price-note">Toujours gratuit</div>
+        <div class="plan-desc">Pour découvrir et tester l'app.</div>
+        <ul class="plan-features">
+          <li><div class="chk">✓</div>Claude Haiku 4.5</li>
+          <li><div class="chk">✓</div>Gemini 2.0 Flash</li>
+          <li><div class="chk">✓</div>FLUX Schnell + LTX Video</li>
+          <li><div class="chk">✓</div>20K tokens / heure</li>
+        </ul>
+        <button class="plan-btn secondary" onclick="openInstall()">Installer gratuitement</button>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">⚡ Recommandé</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><span class="price-cur">€</span><span class="price-amount" id="pro-price">29<sup style="font-size:26px;font-family:'Outfit';font-weight:700">,99</sup></span></div>
+        <div class="price-note" id="pro-note">/ mois · sans engagement</div>
+        <div class="plan-desc">Pour créateurs et agences.</div>
+        <ul class="plan-features">
+          <li><div class="chk">✓</div><strong>Claude Sonnet + Opus</strong> illimités</li>
+          <li><div class="chk">✓</div><strong>FLUX.2 Pro Ultra</strong> 4K</li>
+          <li><div class="chk">✓</div><strong>Kling 3.0 · Sora 2 Pro · Veo 3.1</strong></li>
+          <li><div class="chk">✓</div>Runway Gen-4 · Wan 2.6</li>
+          <li><div class="chk">✓</div>Découpe vidéo auto</li>
+          <li><div class="chk">✓</div>Interface Admin API</li>
+        </ul>
+        <button class="plan-btn primary" onclick="openCheckout()">S'abonner maintenant →</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:20px;">🔒 Paiement sécurisé Stripe · Résiliation à tout moment</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-label">FAQ</div>
+  <div class="section-title">Questions fréquentes</div>
+  <div class="faq-list">
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Comment installer l'app sur mon téléphone ? <span class="faq-arrow">▾</span></button><div class="faq-a">Appuie sur "Installer l'app" en haut de cette page. Sur Android Chrome, un popup s'affiche automatiquement. Sur iPhone, ouvre dans Safari → Partager → Sur l'écran d'accueil. Aucun App Store requis.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Quels modèles sont inclus en Pro ? <span class="faq-arrow">▾</span></button><div class="faq-a">Claude Opus 4.6 + Sonnet 4.6, FLUX.2 Pro Ultra 4K, Kling 2.6 et 3.0 Pro, Sora 2 + Sora 2 Pro, Veo 3.1 Fast, Runway Gen-4, Gemini 2.5 Pro, Ideogram V3, GPT Image 1.5 et Wan 2.6.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Puis-je résilier à tout moment ? <span class="faq-arrow">▾</span></button><div class="faq-a">Oui, sans frais. Résiliation en 1 clic depuis Stripe. Tu gardes l'accès Pro jusqu'à la fin de la période payée.</div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">L'app fonctionne hors connexion ? <span class="faq-arrow">▾</span></button><div class="faq-a">L'interface charge hors ligne grâce au Service Worker. Les générations IA nécessitent une connexion pour appeler les APIs.</div></div>
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:8px;"><strong style="color:var(--white)">NIM Studio Pro</strong> · <a href="#">NexusAI Agency</a></p>
+  <p>© 2026 · <a href="mailto:support@nimstudiopro.com">Support</a></p>
+</footer>
+
+<!-- ══ INSTALL POPUP ══ -->
+<div role="dialog" aria-modal="true" class="inst-overlay" id="inst-overlay">
+  <div class="inst-sheet">
+    <div class="inst-handle"></div>
+    <div id="inst-default">
+      <div class="inst-logo-row">
+        <div class="inst-logo">N</div>
+        <div><div class="inst-app-name">NIM Studio <span>Pro</span></div><div class="inst-app-sub">Claude · FLUX · Kling · Sora</div></div>
+      </div>
+      <div class="inst-pills">
+        <span class="inst-pill">🤖 Claude</span><span class="inst-pill">🎨 FLUX</span>
+        <span class="inst-pill">🎬 Kling</span><span class="inst-pill">⚡ Sora</span><span class="inst-pill">📶 Offline</span>
+      </div>
+      <div class="ios-guide" id="ios-guide">
+        <div class="ios-step"><div class="ios-n">1</div><div class="ios-t">Appuie sur <b>Partager ↑</b> en bas de Safari</div></div>
+        <div class="ios-step"><div class="ios-n">2</div><div class="ios-t">Fais défiler → <b>« Sur l'écran d'accueil »</b></div></div>
+        <div class="ios-step"><div class="ios-n">3</div><div class="ios-t">Appuie sur <b>« Ajouter »</b> en haut à droite</div></div>
+        <div class="ios-step"><div class="ios-n">4</div><div class="ios-t">NIM Studio Pro apparaît sur ton écran d'accueil 🚀</div></div>
+      </div>
+      <button class="inst-btn" id="inst-btn" onclick="doInstall()">
+        <span id="ibi">📲</span><span id="ibt">Installer sur mon téléphone</span>
+      </button>
+      <div class="inst-prog"><div class="inst-prog-fill" id="ipf"></div></div>
+      <div class="inst-prog-lbl" id="ipl">Chargement…</div>
+      <button class="inst-skip" onclick="closeInstall()">Ouvrir sans installer →</button>
+    </div>
+    <div id="inst-done" style="display:none;">
+      <div class="inst-done"><div class="inst-done-ico">✅</div><div class="inst-done-title">App installée !</div><div class="inst-done-sub">NIM Studio Pro est sur ton écran d'accueil.<br>Ferme cette page et ouvre l'app.</div></div>
+      <button class="inst-btn" style="margin-top:16px;" onclick="window.location.href='app.html'">🚀 Ouvrir NIM Studio Pro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHECKOUT ══ -->
+<div role="dialog" aria-modal="true" class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Souscrire — NIM Studio Pro</div><button class="modal-close" onclick="closeCheckout()">✕</button></div>
+    <div class="modal-summary"><div class="modal-plan" id="mpl">Plan Pro — Mensuel</div><div class="modal-price" id="mpr">29,99€ / mois</div></div>
+    <ul class="modal-feats">
+      <li><div class="chk">✓</div>Claude Opus + Sonnet illimités</li>
+      <li><div class="chk">✓</div>FLUX Ultra 4K + Kling + Sora + Veo</li>
+      <li><div class="chk">✓</div>Accès immédiat · Résiliation 1 clic</li>
+    </ul>
+    <button class="plan-btn primary" onclick="goStripe()">Payer avec Stripe →</button>
+    <div class="stripe-note">🔒 Sécurisé par <a href="https://stripe.com" target="_blank">Stripe</a></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const _ua=navigator.userAgent.toLowerCase();
+const _iOS=/iphone|ipad|ipod/.test(_ua);
+const _android=/android/.test(_ua);
+const _safari=/safari/.test(_ua)&&!/chrome/.test(_ua)&&!/crios/.test(_ua);
+const _standalone=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
+let _dip=null;
+
+// SW
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.register('./sw.js',{scope:'./'}).then(reg=>{
+    ip(40,'Service Worker actif…');
+    if(reg.active)ip(90,'Cache prêt · Offline OK ✓');
+    reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(!nw)return;nw.addEventListener('statechange',()=>{if(nw.state==='installed')ip(85,'Cache mis à jour…');if(nw.state==='activated')ip(100,'Prêt · 100% offline ✓');});});
+  }).catch(()=>ip(0,''));
+}
+function ip(p,l){const f=document.getElementById('ipf'),t=document.getElementById('ipl');if(f)f.style.width=p+'%';if(t)t.textContent=l;}
+
+// beforeinstallprompt
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;document.getElementById('ibi').textContent='📲';document.getElementById('ibt').textContent='Installer NIM Studio Pro';});
+window.addEventListener('appinstalled',()=>{_dip=null;showDone();});
+
+// Détection desktop
+const _desktop = !/mobile|android|iphone|ipad|ipod/i.test(_ua);
+
+// Open/close popup
+function openInstall(){
+  const ov=document.getElementById('inst-overlay');
+  if(!ov)return;
+  if(_standalone){showDone();ov.classList.add('open');return;}
+  const ibi=document.getElementById('ibi'),ibt=document.getElementById('ibt'),g=document.getElementById('ios-guide');
+  if(_iOS&&_safari){g.classList.add('show');ibi.textContent='📋';ibt.textContent='Voir les étapes iPhone';}
+  else if(_iOS){ibi.textContent='🌐';ibt.textContent='Ouvrir dans Safari pour installer';}
+  else if(_desktop&&!_dip){ibi.textContent='💻';ibt.textContent="Ouvrir l'application web →";}
+  else{ibi.textContent='📲';ibt.textContent='Installer sur mon téléphone';}
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeInstall(){const ov=document.getElementById('inst-overlay');if(ov)ov.classList.remove('open');document.body.style.overflow='';window.location.href='app.html';}
+document.getElementById('inst-overlay').addEventListener('click',function(e){if(e.target===this)closeInstall();});
+function showDone(){document.getElementById('inst-default').style.display='none';document.getElementById('inst-done').style.display='block';}
+
+// Install action
+async function doInstall(){
+  // 1. Android Chrome / Edge avec prompt natif dispo
+  if(_dip){
+    const btn=document.getElementById('inst-btn');btn.innerHTML='<span>⏳</span><span>Installation…</span>';btn.disabled=true;
+    try{
+      await _dip.prompt();
+      const{outcome}=await _dip.userChoice;
+      _dip=null;
+      if(outcome==='accepted'){ip(100,'Installation réussie !');setTimeout(showDone,600);}
+      else{btn.innerHTML='<span>📲</span><span>Réessayer</span>';btn.disabled=false;}
+    }catch{btn.innerHTML='<span>📲</span><span>Installer NIM Studio Pro</span>';btn.disabled=false;}
+    return;
+  }
+  // 2. iOS Safari → toggle guide manuel
+  if(_iOS&&_safari){
+    const g=document.getElementById('ios-guide');
+    g.classList.toggle('show');
+    document.getElementById('ibt').textContent=g.classList.contains('show')?'Masquer les étapes':'Voir les étapes iPhone';
+    return;
+  }
+  // 3. iOS hors Safari → message
+  if(_iOS){
+    alert('Pour installer NIM Studio Pro sur iPhone, ouvre cette page dans Safari.');
+    return;
+  }
+  // 4. Desktop / fallback : ouvrir l'app directement
+  window.location.href='app.html';
+}
+
+// Auto-open : seulement si install vraiment possible (mobile + pas déjà installé + pas dismissé)
+window.addEventListener('load',()=>{
+  if(_standalone)return;
+  if(localStorage.getItem('nim_idm'))return;
+  // Desktop : pas d'auto-open intrusif
+  if(_desktop)return;
+  setTimeout(openInstall,800);
+});
+// Fix : marquer dismiss au close pour ne pas re-pop à chaque visite
+const _origClose=closeInstall;
+
+// Checkout
+let _plan='monthly';
+function setPlan(t){_plan=t;document.getElementById('btn-monthly').classList.toggle('active',t==='monthly');document.getElementById('btn-annual').classList.toggle('active',t==='annual');const p=document.getElementById('pro-price'),n=document.getElementById('pro-note');if(t==='annual'){p.innerHTML='239<sup style="font-size:26px;font-family:\'Outfit\';font-weight:700">€</sup>';n.textContent='/ an · soit 19,99€/mois — 2 mois offerts';}else{p.innerHTML='29<sup style="font-size:26px;font-family:\'Outfit\';font-weight:700">,99</sup>';n.textContent='/ mois · sans engagement';}}
+function openCheckout(){const a=_plan==='annual';document.getElementById('mpl').textContent='Plan Pro — '+(a?'Annuel':'Mensuel');document.getElementById('mpr').textContent=a?'239€ / an':'29,99€ / mois';document.getElementById('checkout-modal').classList.add('open');}
+function closeCheckout(){document.getElementById('checkout-modal').classList.remove('open');}
+function goStripe(){const l=_plan==='annual'?CONFIG.STRIPE_ANNUAL_LINK:CONFIG.STRIPE_MONTHLY_LINK;if(!l||l.includes('COLLE_TA')){alert('Lien Stripe non configuré. Contacte support@nimstudiopro.com');return;}closeCheckout();window.location.href=l;}
+document.getElementById('checkout-modal').addEventListener('click',function(e){if(e.target===this)closeCheckout();});
+function toggleFaq(b){b.closest('.faq-item').classList.toggle('open');}
+
+// 🔒 P0-4 v4.2 — Fermer modals au clavier
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.modal-overlay.open, .inst-overlay.open').forEach(m => m.classList.remove('open'));
+  document.body.style.overflow = '';
+});
+</script>
+</body>
+</html>

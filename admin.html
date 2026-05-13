@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIM Admin · Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#08090F">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--g:#7ED8B4;--gl:#A8EDCD;--gd:#4BB896;--dark:#08090F;--s1:#0F1018;--s2:#171924;--s3:#20232E;--bdr:#2C2F3E;--txt:#F0F2FF;--muted:#6B7099;--red:#FF5577;--org:#FF9F43;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Outfit',sans-serif;background:var(--dark);color:var(--txt);min-height:100vh;padding:24px;}
+.container{max-width:1280px;margin:0 auto;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--bdr);}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-logo{width:44px;height:44px;background:var(--g);border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#000;}
+.brand-text h1{font-family:'Instrument Serif',serif;font-size:28px;letter-spacing:-.5px;color:var(--txt);}
+.brand-text p{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.header-actions{display:flex;gap:10px;align-items:center;}
+.user-pill{background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:8px 14px;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+.btn{background:var(--s2);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn:hover{background:var(--s3);border-color:var(--g);}
+.btn.primary{background:var(--g);color:#000;border-color:var(--g);}
+.btn.danger{color:var(--red);border-color:var(--red);}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:32px;}
+.kpi{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:20px;}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:'DM Mono',monospace;}
+.kpi-value{font-family:'Instrument Serif',serif;font-size:38px;color:var(--g);margin-top:8px;line-height:1;}
+.kpi-trend{font-size:12px;color:var(--muted);margin-top:6px;}
+.kpi-trend.up{color:var(--g);}
+.kpi-trend.down{color:var(--red);}
+
+/* Charts */
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:32px;}
+@media(max-width:960px){.charts-grid{grid-template-columns:1fr;}}
+.card{background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:20px;}
+.card-title{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.card-title small{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;font-weight:500;}
+.chart-wrap{position:relative;height:280px;}
+
+/* Tables */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--bdr);font-weight:600;}
+td{padding:10px 12px;border-bottom:1px solid rgba(44,47,62,.5);color:var(--txt);}
+tr:hover td{background:rgba(126,216,180,.04);}
+.badge{display:inline-block;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-family:'DM Mono',monospace;}
+.badge.free{background:rgba(107,112,153,.2);color:var(--muted);}
+.badge.pro{background:rgba(126,216,180,.15);color:var(--g);}
+.badge.admin{background:rgba(255,159,67,.15);color:var(--org);}
+.badge.ok{background:rgba(126,216,180,.15);color:var(--g);}
+.badge.err{background:rgba(255,85,119,.15);color:var(--red);}
+
+/* Loading & access denied */
+.fullscreen{position:fixed;inset:0;background:var(--dark);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999;}
+.spinner{width:40px;height:40px;border:3px solid var(--bdr);border-top-color:var(--g);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.deny{text-align:center;padding:40px;}
+.deny h2{font-family:'Instrument Serif',serif;font-size:32px;color:var(--red);margin-bottom:12px;}
+.deny p{color:var(--muted);max-width:400px;margin:0 auto 20px;}
+</style>
+</head>
+<body>
+
+<div class="fullscreen" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;">Vérification accès admin…</div>
+</div>
+
+<div class="fullscreen" id="denied" style="display:none;">
+  <div class="deny">
+    <h2>🚫 Accès refusé</h2>
+    <p>Cette page est réservée aux administrateurs NIM Studio Pro.</p>
+    <a href="app.html" class="btn primary">← Retour à l'app</a>
+  </div>
+</div>
+
+<div class="container" id="dashboard" style="display:none;">
+  <header>
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div class="brand-text">
+        <h1>NIM Admin</h1>
+        <p>Dashboard · v1.0</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="user-pill" id="user-pill">—</div>
+      <a href="app.html" class="btn">← App</a>
+      <button class="btn danger" onclick="signOut()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Utilisateurs total</div><div class="kpi-value" id="kpi-users">—</div><div class="kpi-trend" id="kpi-users-trend">—</div></div>
+    <div class="kpi"><div class="kpi-label">Pro actifs</div><div class="kpi-value" id="kpi-pro">—</div><div class="kpi-trend">MRR estimé : <span id="kpi-mrr">—</span></div></div>
+    <div class="kpi"><div class="kpi-label">Appels API (30j)</div><div class="kpi-value" id="kpi-calls">—</div><div class="kpi-trend">Aujourd'hui : <span id="kpi-calls-today">—</span></div></div>
+    <div class="kpi"><div class="kpi-label">Coût API (30j)</div><div class="kpi-value" id="kpi-cost">—</div><div class="kpi-trend">Aujourd'hui : <span id="kpi-cost-today">—</span></div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">Coût API par jour <small>30 derniers jours</small></div>
+      <div class="chart-wrap"><canvas id="chart-cost"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Répartition providers <small>30 jours</small></div>
+      <div class="chart-wrap"><canvas id="chart-providers"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Top users -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Top utilisateurs (par tokens consommés) <small>30 jours</small></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Email</th><th>Plan</th><th>Appels</th><th>Tokens</th><th>Coût USD</th><th>Dernière activité</th></tr>
+        </thead>
+        <tbody id="tbl-users"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:30px;">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent calls -->
+  <div class="card">
+    <div class="card-title">Derniers appels API <small>50 derniers</small></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Quand</th><th>User</th><th>Provider</th><th>Modèle</th><th>Tokens</th><th>Coût</th><th>Status</th></tr>
+        </thead>
+        <tbody id="tbl-calls"><tr><td colspan="7" style="color:var(--muted);text-align:center;padding:30px;">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:24px;font-family:'DM Mono',monospace;">
+    Données live · Supabase · Rafraîchir la page pour mettre à jour
+  </p>
+</div>
+
+<script src="config.js"></script>
+<script>
+let sb = null, currentUser = null;
+
+async function init() {
+  try {
+    sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    const { data: { session } } = await sb.auth.getSession();
+
+    if (!session?.user) { showDenied('Connexion requise'); return; }
+    currentUser = session.user;
+
+    // Vérifier plan admin
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('plan, email')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (error || profile?.plan !== 'admin') {
+      showDenied('Accès admin requis');
+      return;
+    }
+
+    document.getElementById('user-pill').textContent = profile.email;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    await loadKPI();
+    await loadCharts();
+    await loadTopUsers();
+    await loadRecentCalls();
+
+  } catch(e) {
+    console.error('[Admin]', e);
+    showDenied('Erreur : ' + e.message);
+  }
+}
+
+function showDenied(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('denied').style.display = 'flex';
+  if (msg) document.querySelector('.deny p').textContent = msg;
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// ── KPI ─────────────────────────────────────────────────────
+async function loadKPI() {
+  const today = new Date().toISOString().slice(0,10);
+  const monthAgo = new Date(Date.now() - 30*86400000).toISOString();
+
+  const [usersTotal, usersPro, callsMonth, callsToday] = await Promise.all([
+    sb.from('profiles').select('id', { count:'exact', head:true }),
+    sb.from('profiles').select('id', { count:'exact', head:true }).eq('plan','pro'),
+    sb.from('api_usage').select('cost_usd, created_at').gte('created_at', monthAgo),
+    sb.from('api_usage').select('cost_usd').gte('created_at', today),
+  ]);
+
+  document.getElementById('kpi-users').textContent = usersTotal.count ?? 0;
+  document.getElementById('kpi-pro').textContent = usersPro.count ?? 0;
+  document.getElementById('kpi-mrr').textContent = '$' + ((usersPro.count ?? 0) * 29.99).toFixed(0);
+
+  document.getElementById('kpi-calls').textContent = (callsMonth.data?.length ?? 0).toLocaleString();
+  document.getElementById('kpi-calls-today').textContent = (callsToday.data?.length ?? 0).toLocaleString();
+
+  const costMonth = (callsMonth.data ?? []).reduce((s,r)=>s+(parseFloat(r.cost_usd)||0), 0);
+  const costToday = (callsToday.data ?? []).reduce((s,r)=>s+(parseFloat(r.cost_usd)||0), 0);
+  document.getElementById('kpi-cost').textContent = '$' + costMonth.toFixed(2);
+  document.getElementById('kpi-cost-today').textContent = '$' + costToday.toFixed(2);
+}
+
+// ── Charts ──────────────────────────────────────────────────
+async function loadCharts() {
+  const monthAgo = new Date(Date.now() - 30*86400000).toISOString();
+  const { data } = await sb.from('api_usage')
+    .select('cost_usd, provider, created_at')
+    .gte('created_at', monthAgo);
+  const rows = data ?? [];
+
+  // Aggregate per day
+  const byDay = {};
+  rows.forEach(r => {
+    const d = r.created_at.slice(0,10);
+    byDay[d] = (byDay[d] ?? 0) + (parseFloat(r.cost_usd)||0);
+  });
+  const days = Object.keys(byDay).sort();
+
+  new Chart(document.getElementById('chart-cost'), {
+    type:'line',
+    data:{
+      labels: days,
+      datasets:[{
+        label:'Coût USD',
+        data: days.map(d => byDay[d].toFixed(4)),
+        borderColor:'#7ED8B4', backgroundColor:'rgba(126,216,180,.1)',
+        tension:.35, fill:true, borderWidth:2, pointRadius:3, pointBackgroundColor:'#7ED8B4',
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ticks:{color:'#6B7099'},grid:{color:'#2C2F3E'}},
+        y:{ticks:{color:'#6B7099',callback:v=>'$'+v},grid:{color:'#2C2F3E'}}
+      }
+    }
+  });
+
+  // Providers donut
+  const byProv = {};
+  rows.forEach(r => byProv[r.provider] = (byProv[r.provider] ?? 0) + 1);
+
+  new Chart(document.getElementById('chart-providers'), {
+    type:'doughnut',
+    data:{
+      labels: Object.keys(byProv),
+      datasets:[{ data: Object.values(byProv), backgroundColor:['#7ED8B4','#FF9F43','#4BB896','#FF5577'] }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom', labels:{color:'#F0F2FF'}} } }
+  });
+}
+
+// ── Top users ───────────────────────────────────────────────
+async function loadTopUsers() {
+  const monthAgo = new Date(Date.now() - 30*86400000).toISOString();
+
+  const { data: usage } = await sb.from('api_usage')
+    .select('user_id, tokens_in, tokens_out, cost_usd, created_at')
+    .gte('created_at', monthAgo);
+
+  // Aggregate per user
+  const agg = {};
+  (usage ?? []).forEach(r => {
+    const u = r.user_id;
+    if (!agg[u]) agg[u] = { calls:0, tokens:0, cost:0, last:r.created_at };
+    agg[u].calls++;
+    agg[u].tokens += (r.tokens_in||0) + (r.tokens_out||0);
+    agg[u].cost += parseFloat(r.cost_usd)||0;
+    if (r.created_at > agg[u].last) agg[u].last = r.created_at;
+  });
+
+  const top = Object.entries(agg).sort((a,b)=>b[1].tokens - a[1].tokens).slice(0,20);
+  if (!top.length) {
+    document.getElementById('tbl-users').innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:30px;">Aucune activité</td></tr>';
+    return;
+  }
+
+  const userIds = top.map(([id]) => id);
+  const { data: profiles } = await sb.from('profiles').select('id, email, plan').in('id', userIds);
+  const pmap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+
+  document.getElementById('tbl-users').innerHTML = top.map(([uid, s]) => {
+    const p = pmap[uid] || { email:'—', plan:'free' };
+    return `<tr>
+      <td>${p.email}</td>
+      <td><span class="badge ${p.plan}">${p.plan}</span></td>
+      <td>${s.calls.toLocaleString()}</td>
+      <td>${s.tokens.toLocaleString()}</td>
+      <td>$${s.cost.toFixed(3)}</td>
+      <td style="color:var(--muted);font-size:12px;">${new Date(s.last).toLocaleString('fr')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Recent calls ────────────────────────────────────────────
+async function loadRecentCalls() {
+  const { data } = await sb.from('api_usage')
+    .select('user_id, provider, model, tokens_in, tokens_out, cost_usd, status, created_at')
+    .order('created_at', { ascending:false })
+    .limit(50);
+
+  if (!data?.length) {
+    document.getElementById('tbl-calls').innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:30px;">Aucun appel</td></tr>';
+    return;
+  }
+
+  const userIds = [...new Set(data.map(r => r.user_id))];
+  const { data: profiles } = await sb.from('profiles').select('id, email').in('id', userIds);
+  const pmap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.email]));
+
+  document.getElementById('tbl-calls').innerHTML = data.map(r => `
+    <tr>
+      <td style="color:var(--muted);font-size:12px;">${new Date(r.created_at).toLocaleString('fr', {hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
+      <td>${pmap[r.user_id] || '—'}</td>
+      <td><span class="badge ${r.provider==='claude'?'pro':r.provider==='fal'?'admin':'free'}">${r.provider}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${r.model || '—'}</td>
+      <td>${((r.tokens_in||0)+(r.tokens_out||0)).toLocaleString()}</td>
+      <td>$${(parseFloat(r.cost_usd)||0).toFixed(4)}</td>
+      <td><span class="badge ${r.status==='ok'?'ok':'err'}">${r.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+init();
+</script>
+</body>
+</html>

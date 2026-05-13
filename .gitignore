@@ -1,0 +1,46 @@
+# ============================================================
+# NIM Studio Pro — .gitignore
+# ============================================================
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dépendances locales (si jamais)
+node_modules/
+package-lock.json
+
+# Fichiers temporaires
+*.tmp
+*.bak
+
+# 🔒 SÉCURITÉ — ne JAMAIS commit
+# Si tu utilises un .env local pour dev
+.env
+.env.local
+.env.*.local
+
+# Secrets éventuels
+secrets.json
+*.key
+*.pem
+
+# Build outputs (si tu ajoutes un bundler plus tard)
+dist/
+build/
+
+# Supabase CLI local
+.supabase/
+supabase/.temp/
