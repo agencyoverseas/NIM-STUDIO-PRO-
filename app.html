@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>NIM Studio Pro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NIM Pro">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ── PALETTE : vert pâle mint, écritures blanc/vert ── */
+:root{
+  --green:#7ED8B4;        /* vert pâle mint */
+  --gl:#A8EDCD;           /* vert clair hover */
+  --gd:#4BB896;           /* vert foncé accent */
+  --dark:#08090F;
+  --s1:#0F1018;
+  --s2:#171924;
+  --s3:#20232E;
+  --bdr:#2C2F3E;
+  --txt:#F0F2FF;           /* blanc chaud */
+  --muted:#6B7099;
+  --red:#FF5577;
+  --org:#FF9F43;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;height:100dvh;overflow:hidden;-webkit-text-size-adjust:100%;}
+body{font-family:'Outfit',sans-serif;background:var(--dark);color:var(--txt);height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased;}
+.screen{display:none;flex-direction:column;height:100%;height:100dvh;}
+.screen.active{display:flex;}
+
+/* SPLASH */
+#splash{align-items:center;justify-content:center;background:var(--dark);position:relative;overflow:hidden;}
+.sp-glow{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(126,216,180,.12) 0%,transparent 70%);animation:breathe 3s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+.sp-logo{width:80px;height:80px;background:var(--green);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#000;z-index:1;animation:fi .5s .3s ease both;box-shadow:0 0 60px rgba(126,216,180,.3);}
+.sp-name{font-size:22px;font-weight:800;margin-top:16px;z-index:1;letter-spacing:-.5px;animation:fi .5s .5s ease both;color:var(--txt);}
+.sp-name span{color:var(--green);}
+.sp-sub{font-size:13px;color:var(--muted);margin-top:6px;z-index:1;animation:fi .5s .7s ease both;}
+.sp-bar{width:40px;height:3px;background:var(--bdr);border-radius:2px;margin-top:40px;overflow:hidden;z-index:1;animation:fi .5s .9s ease both;}
+.sp-fill{height:100%;background:var(--green);border-radius:2px;animation:load 1.8s 1s ease forwards;}
+@keyframes load{from{width:0%;}to{width:100%;}}
+@keyframes fi{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* GATE */
+#gate-screen{align-items:center;justify-content:center;padding:24px 20px;padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(24px,env(safe-area-inset-bottom));background:var(--dark);overflow-y:auto;}
+.gc{width:100%;max-width:360px;z-index:1;}
+.g-logo{display:flex;align-items:center;gap:10px;margin-bottom:26px;}
+.g-badge{width:40px;height:40px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#000;}
+.g-name{font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--txt);}
+.g-name span{color:var(--green);}
+.g-tabs{display:flex;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:4px;margin-bottom:22px;gap:4px;}
+.g-tab{flex:1;padding:9px;border-radius:9px;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--muted);transition:all .2s;}
+.g-tab.active{background:var(--green);color:#000;}
+.fl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px;}
+.gi{width:100%;background:var(--s1);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;padding:13px 14px;border-radius:11px;outline:none;margin-bottom:12px;transition:border-color .2s;-webkit-appearance:none;}
+.gi:focus{border-color:var(--green);}
+.gi::placeholder{color:var(--muted);}
+.gb{width:100%;background:var(--green);color:#000;border:none;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;padding:14px;border-radius:11px;cursor:pointer;transition:all .2s;margin-bottom:10px;-webkit-appearance:none;}
+.gb:active{transform:scale(.98);opacity:.9;}
+.gb:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.g-div{display:flex;align-items:center;gap:10px;margin:4px 0 10px;color:var(--muted);font-size:12px;}
+.g-div::before,.g-div::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.gfb{width:100%;background:transparent;color:var(--green);border:1px solid rgba(126,216,180,.4);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:11px;cursor:pointer;transition:all .2s;margin-bottom:14px;-webkit-appearance:none;}
+.gfb:hover{background:rgba(126,216,180,.08);border-color:var(--green);}
+.gfb:active{transform:scale(.98);}
+.gmsg{font-size:12px;font-family:'DM Mono',monospace;text-align:center;min-height:18px;margin-bottom:10px;}
+.gmsg.err{color:var(--red);}.gmsg.ok{color:var(--green);}
+.ghint{font-size:11px;color:var(--muted);text-align:center;line-height:1.5;}
+.g-forgot{display:block;width:100%;font-size:12px;color:var(--muted);text-align:right;cursor:pointer;margin-bottom:14px;margin-top:-4px;background:none;border:none;font-family:'Outfit',sans-serif;padding:0;}
+.g-forgot:hover{color:var(--green);}
+.g-switch{font-size:13px;color:var(--muted);text-align:center;margin-top:8px;}
+.g-switch span{color:var(--green);cursor:pointer;font-weight:600;}
+
+/* APP HEADER */
+#app-screen{position:relative;}
+.ah{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--bdr);background:var(--s1);flex-shrink:0;min-height:52px;}
+.al{display:flex;align-items:center;gap:8px;}
+.ab{width:28px;height:28px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;flex-shrink:0;}
+.at{font-size:14px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;color:var(--txt);}
+.at span{color:var(--green);}
+.hr{display:flex;align-items:center;gap:6px;}
+.ib{width:32px;height:32px;background:var(--s2);border:1px solid var(--bdr);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .15s;color:var(--muted);flex-shrink:0;}
+.ib:active{border-color:var(--green);color:var(--green);transform:scale(.92);}
+
+/* STATUS BAR */
+.sb{display:flex;align-items:center;gap:7px;padding:5px 14px;background:var(--s1);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.sd{width:6px;height:6px;border-radius:50%;background:var(--green);animation:bl 2s infinite;flex-shrink:0;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.3;}}
+.st{font-family:'DM Mono',monospace;font-size:10px;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pb{font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+.pb.free{background:var(--s3);color:var(--muted);border:1px solid var(--bdr);}
+.pb.pro{background:var(--green);color:#000;}
+
+/* QUOTA BAR */
+#qb{display:none;flex-shrink:0;padding:7px 14px;background:var(--s1);border-bottom:1px solid var(--bdr);}
+.qr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.ql{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.qv{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;}
+.qv.ok{color:var(--green);}.qv.warn{color:var(--org);}.qv.danger{color:var(--red);}
+.qt{width:100%;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+.qf{height:100%;border-radius:2px;transition:width .4s ease,background .3s;}
+.qrst{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:right;}
+
+/* SYSTEM PROMPT */
+.sysp{display:none;flex-shrink:0;background:var(--s1);border-bottom:1px solid var(--bdr);padding:10px 14px;}
+.sysp.open{display:block;}
+.sysp textarea{width:100%;background:var(--s2);border:1px solid var(--bdr);color:var(--txt);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;border-radius:8px;outline:none;resize:none;min-height:60px;line-height:1.5;-webkit-appearance:none;}
+.sysp textarea:focus{border-color:var(--green);}
+.syr{display:flex;justify-content:space-between;align-items:center;margin-top:7px;}
+.syl{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.sys-save{background:var(--green);color:#000;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;}
+
+/* MESSAGES */
+#msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 14px 8px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+#msgs::-webkit-scrollbar{display:none;}
+.msg{display:flex;gap:9px;animation:mi .2s ease;}
+.msg.user{flex-direction:row-reverse;}
+@keyframes mi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.av{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:2px;}
+.av.ai{background:var(--green);color:#000;}.av.me{background:var(--s3);border:1px solid var(--bdr);color:var(--green);}
+.bub{max-width:calc(100% - 42px);padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.msg.ai .bub{background:var(--s2);border:1px solid var(--bdr);border-top-left-radius:3px;color:var(--txt);}
+.msg.user .bub{background:var(--green);color:#000;font-weight:600;border-top-right-radius:3px;}
+.typdots{display:flex;gap:5px;align-items:center;padding:4px 0;}
+.typdots span{width:7px;height:7px;background:var(--green);border-radius:50%;animation:tp 1.2s infinite;}
+.typdots span:nth-child(2){animation-delay:.2s;}.typdots span:nth-child(3){animation-delay:.4s;}
+@keyframes tp{0%,80%,100%{transform:translateY(0);opacity:.4;}40%{transform:translateY(-6px);opacity:1;}}
+
+/* WELCOME */
+.welcome{text-align:center;padding:32px 16px;}
+.wi{width:56px;height:56px;background:rgba(126,216,180,.1);border:1px solid rgba(126,216,180,.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 14px;}
+.welcome h2{font-size:18px;font-weight:800;color:var(--txt);margin-bottom:6px;}
+.welcome p{font-size:13px;color:var(--muted);line-height:1.6;max-width:260px;margin:0 auto 16px;}
+.uchip{display:inline-flex;align-items:center;gap:6px;background:rgba(126,216,180,.1);border:1px solid rgba(126,216,180,.3);color:var(--green);font-size:13px;font-weight:700;padding:9px 18px;border-radius:100px;cursor:pointer;text-decoration:none;}
+
+/* LIMIT WALL */
+#lw{display:none;position:absolute;inset:0;background:rgba(8,9,15,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:40;align-items:center;justify-content:center;padding:24px;}
+#lw.show{display:flex;}
+.lc{background:var(--s2);border:1px solid var(--bdr);border-radius:22px;padding:32px 24px;text-align:center;max-width:320px;width:100%;animation:pop .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+.li{width:58px;height:58px;background:rgba(255,159,67,.1);border:1px solid rgba(255,159,67,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;}
+.lt{font-family:'Instrument Serif',serif;font-size:24px;letter-spacing:-.5px;color:var(--txt);margin-bottom:8px;}
+.ls{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:6px;}
+.ltimer{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--org);margin:14px 0;letter-spacing:3px;}
+.lup{width:100%;background:var(--green);color:#000;border:none;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;padding:14px;border-radius:12px;cursor:pointer;margin-bottom:10px;display:block;text-decoration:none;text-align:center;}
+.lup:active{opacity:.85;transform:scale(.98);}
+
+/* INPUT AREA */
+.iw{padding:8px 12px;padding-bottom:max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--bdr);background:var(--s1);flex-shrink:0;}
+/* Ligne 1 : model selector inline + durée vidéo */
+.iw-top{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.ms-mini{flex:1;appearance:none;-webkit-appearance:none;background:var(--s2);border:1px solid var(--bdr);color:var(--txt);font-family:'DM Mono',monospace;font-size:10px;padding:5px 24px 5px 8px;border-radius:7px;cursor:pointer;outline:none;min-width:0;}
+.ms-mini:focus{border-color:var(--green);}
+.ms-wrap{position:relative;flex:1;min-width:0;}
+.ms-arr{position:absolute;right:6px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--green);font-size:9px;}
+.dur-sel{appearance:none;-webkit-appearance:none;background:var(--s3);border:1px solid var(--bdr);color:var(--green);font-family:'DM Mono',monospace;font-size:10px;padding:5px 20px 5px 7px;border-radius:7px;cursor:pointer;outline:none;display:none;}
+.dur-sel.show{display:block;}
+.dur-wrap{position:relative;}
+.dur-arr{position:absolute;right:4px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--green);font-size:8px;}
+/* Ligne 2 : prompt + send */
+.iw-row{display:flex;gap:8px;align-items:flex-end;}
+#prompt{flex:1;background:var(--s2);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;font-size:16px;padding:10px 13px;border-radius:12px;outline:none;resize:none;min-height:44px;max-height:110px;line-height:1.5;transition:border-color .2s;-webkit-appearance:none;}
+#prompt:focus{border-color:var(--green);}
+#prompt::placeholder{color:var(--muted);}
+#prompt:disabled{opacity:.4;}
+#sb2{width:44px;height:44px;background:var(--green);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+#sb2:active{transform:scale(.92);opacity:.85;}
+#sb2:disabled{opacity:.3;cursor:not-allowed;}
+
+/* NAV */
+.bnav{display:flex;background:var(--s1);border-top:1px solid var(--bdr);padding-bottom:max(0px,env(safe-area-inset-bottom));flex-shrink:0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;cursor:pointer;transition:all .15s;border:none;background:none;color:var(--muted);font-family:'Outfit',sans-serif;}
+.ni.active{color:var(--green);}
+.ni:active{opacity:.7;}
+.ni-icon{font-size:20px;margin-bottom:3px;}
+.ni-lbl{font-size:10px;font-weight:600;letter-spacing:.3px;}
+
+/* HISTORY */
+#history-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.hcont{padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(80px,calc(env(safe-area-inset-bottom)+80px));max-width:480px;margin:0 auto;}
+.hempty{text-align:center;padding:60px 20px;color:var(--muted);}
+.hempty .he{font-size:40px;margin-bottom:12px;}
+.hcard{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px;}
+.hcard-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;}
+.hcard-u{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:4px;}
+.hcard-a{font-size:13px;color:var(--muted);line-height:1.5;}
+
+/* SETTINGS */
+#settings-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.scont{padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(80px,calc(env(safe-area-inset-bottom)+80px));max-width:480px;margin:0 auto;}
+.ssec{margin-bottom:22px;}
+.sslbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace;}
+.scard{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bdr);}
+.srow:last-child{border-bottom:none;}
+.srl{display:flex;align-items:center;gap:12px;}
+.sri{font-size:18px;}
+.srlbl{font-size:14px;font-weight:600;color:var(--txt);}
+.srsub{font-size:12px;color:var(--muted);margin-top:1px;}
+.srr{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;}
+.tog{position:relative;width:44px;height:24px;}
+.tog input{display:none;}
+.togsl{position:absolute;inset:0;background:var(--bdr);border-radius:12px;cursor:pointer;transition:.3s;}
+.togsl::before{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;}
+.tog input:checked+.togsl{background:var(--green);}
+.tog input:checked+.togsl::before{transform:translateX(20px);}
+.pcard{background:rgba(126,216,180,.06);border:1px solid rgba(126,216,180,.2);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.pci h3{font-size:16px;font-weight:800;color:var(--txt);}
+.pci p{font-size:12px;color:var(--muted);margin-top:2px;}
+.pcbp{background:var(--green);color:#000;font-size:12px;font-weight:800;padding:5px 12px;border-radius:100px;}
+.pcbp.fb{background:var(--s3);color:var(--muted);border:1px solid var(--bdr);}
+.bdanger{background:rgba(255,85,119,.1);border:1px solid rgba(255,85,119,.3);color:var(--red);font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;padding:13px;border-radius:11px;cursor:pointer;width:100%;text-align:center;}
+
+/* ADMIN SCREEN */
+#admin-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.acont{padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(90px,calc(env(safe-area-inset-bottom)+90px));max-width:480px;margin:0 auto;}
+.admin-title{font-size:20px;font-weight:800;color:var(--txt);margin-bottom:4px;}
+.admin-sub{font-size:12px;color:var(--muted);margin-bottom:20px;font-family:'DM Mono',monospace;}
+.credit-card{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:14px;}
+.cc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cc-name{font-size:14px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:8px;}
+.cc-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--green);}
+.cbar-wrap{margin-bottom:10px;}
+.cbar-row{display:flex;justify-content:space-between;margin-bottom:5px;}
+.cbar-label{font-size:11px;color:var(--muted);}
+.cbar-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--txt);}
+.cbar{width:100%;height:6px;background:var(--bdr);border-radius:3px;overflow:hidden;}
+.cbar-fill{height:100%;border-radius:3px;transition:width .4s,background .3s;}
+.cc-actions{display:flex;gap:8px;}
+.cc-btn{flex:1;padding:9px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .2s;text-align:center;}
+.cc-btn.primary{background:var(--green);color:#000;}
+.cc-btn.secondary{background:var(--s3);color:var(--txt);border:1px solid var(--bdr);}
+.admin-key-section{margin-bottom:16px;}
+.key-row{background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.key-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.key-input{width:100%;background:var(--s3);border:1px solid var(--bdr);color:var(--txt);font-family:'DM Mono',monospace;font-size:11px;padding:8px 10px;border-radius:7px;outline:none;-webkit-appearance:none;}
+.key-input:focus{border-color:var(--green);}
+.key-save{background:var(--green);color:#000;border:none;font-size:12px;font-weight:700;padding:6px 14px;border-radius:6px;cursor:pointer;margin-top:8px;}
+.admin-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px;}
+
+/* CONFIRM */
+.cbg{display:none;position:fixed;inset:0;background:rgba(8,9,15,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:100;align-items:flex-end;padding:0;}
+.cbg.open{display:flex;}
+.csh{background:var(--s2);border:1px solid var(--bdr);border-radius:24px 24px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));width:100%;animation:su .25s ease;}
+@keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.chandl{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 20px;}
+.csh h3{font-size:18px;font-weight:800;text-align:center;margin-bottom:8px;color:var(--txt);}
+.csh p{font-size:14px;color:var(--muted);text-align:center;margin-bottom:20px;}
+.cbtns{display:flex;gap:10px;}
+.ccan{flex:1;padding:13px;border-radius:11px;border:1px solid var(--bdr);background:transparent;color:var(--txt);font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;cursor:pointer;}
+.cok{flex:1;padding:13px;border-radius:11px;border:none;background:var(--red);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
+
+/* VIDEO CUT POPUP */
+.popup-bg{display:none;position:fixed;inset:0;background:rgba(8,9,15,.9);backdrop-filter:blur(12px);z-index:200;align-items:flex-end;}
+.popup-bg.open{display:flex;}
+.popup-sheet{background:var(--s2);border:1px solid var(--bdr);border-radius:22px 22px 0 0;padding:20px;padding-bottom:max(24px,env(safe-area-inset-bottom));width:100%;animation:su .25s ease;}
+.popup-handle{width:36px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 16px;}
+.popup-title{font-size:17px;font-weight:800;color:var(--txt);margin-bottom:4px;}
+.popup-sub{font-size:12px;color:var(--muted);margin-bottom:16px;font-family:'DM Mono',monospace;}
+.cut-option{background:var(--s3);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s;}
+.cut-option:hover,.cut-option.sel{border-color:var(--green);}
+.cut-option.sel{background:rgba(126,216,180,.08);}
+.cut-name{font-size:14px;font-weight:600;color:var(--txt);}
+.cut-detail{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
+.cut-badge{background:var(--green);color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;}
+.popup-actions{display:flex;gap:10px;margin-top:16px;}
+.popup-cancel{flex:1;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt);font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;cursor:pointer;}
+.popup-confirm{flex:1;padding:12px;border-radius:10px;border:none;background:var(--green);color:#000;font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}
+
+/* OFFLINE */
+#offbanner{display:none;background:var(--org);color:#000;font-size:12px;font-weight:700;text-align:center;padding:6px;flex-shrink:0;font-family:'DM Mono',monospace;}
+#offbanner.show{display:block;}
+
+/* INSTALL PROMPT */
+#instprompt{display:none;}
+.incard{background:var(--s2);border:1px solid var(--green);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.inico{width:40px;height:40px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#000;flex-shrink:0;}
+.intxt h4{font-size:14px;font-weight:700;color:var(--txt);}
+.intxt p{font-size:12px;color:var(--muted);}
+.inacts{display:flex;gap:8px;margin-left:auto;flex-shrink:0;}
+.inyes{background:var(--green);color:#000;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;padding:7px 14px;border-radius:8px;cursor:pointer;}
+.inno{background:transparent;border:1px solid var(--bdr);color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="sp-glow"></div>
+  <div class="sp-logo">N</div>
+  <div class="sp-name">NIM Studio <span>Pro</span></div>
+  <div class="sp-sub">Claude · fal.ai · Gemini · Un seul accès</div>
+  <div class="sp-bar"><div class="sp-fill"></div></div>
+</div>
+
+<!-- GATE -->
+<div class="screen" id="gate-screen">
+  <div class="gc">
+    <div class="g-logo">
+      <div class="g-badge">N</div>
+      <div class="g-name">NIM Studio <span>Pro</span></div>
+    </div>
+    <div class="g-tabs" id="g-tabs-bar">
+      <button class="g-tab active" id="tab-login" onclick="showGTab('login')">Connexion</button>
+      <button class="g-tab" id="tab-signup" onclick="showGTab('signup')">Créer un compte</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="gt-login">
+      <div class="fl">Email</div>
+      <input type="email" class="gi" id="login-email" placeholder="ton@email.com" inputmode="email" autocomplete="email">
+      <div class="fl">Mot de passe</div>
+      <input type="password" class="gi" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      <button class="g-forgot" onclick="showGTab('forgot')">Mot de passe oublié ?</button>
+      <div class="gmsg" id="login-msg"></div>
+      <button class="gb" id="login-btn" onclick="doLogin()">Se connecter →</button>
+      <div class="g-div">ou</div>
+      <button class="gfb" onclick="enterFree()">⚡ Essayer gratuitement · 10K tokens/h</button>
+      <p class="g-switch">Pas encore de compte ? <span onclick="showGTab('signup')">Créer un compte</span></p>
+    </div>
+    <!-- SIGNUP -->
+    <div id="gt-signup" style="display:none;">
+      <div class="fl">Email</div>
+      <input type="email" class="gi" id="signup-email" placeholder="ton@email.com" inputmode="email" autocomplete="email">
+      <div class="fl">Mot de passe</div>
+      <input type="password" class="gi" id="signup-password" placeholder="Minimum 8 caractères" autocomplete="new-password">
+      <div class="fl">Confirmer</div>
+      <input type="password" class="gi" id="signup-confirm" placeholder="••••••••" autocomplete="new-password">
+      <div class="gmsg" id="signup-msg"></div>
+      <button class="gb" id="signup-btn" onclick="doSignup()">Créer mon compte →</button>
+      <p class="g-switch">Déjà un compte ? <span onclick="showGTab('login')">Se connecter</span></p>
+      <p class="ghint" style="margin-top:10px;">Accès Pro disponible sur <a href="#" onclick="openUpgradeModal();return false;" style="color:var(--green);">nos plans →</a></p>
+    </div>
+    <!-- FORGOT -->
+    <div id="gt-forgot" style="display:none;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.55;">Entre ton email, on t'envoie un lien de réinitialisation.</p>
+      <div class="fl">Email</div>
+      <input type="email" class="gi" id="forgot-email" placeholder="ton@email.com" inputmode="email">
+      <div class="gmsg" id="forgot-msg"></div>
+      <button class="gb" id="forgot-btn" onclick="doForgot()">Envoyer le lien →</button>
+      <p class="g-switch"><span onclick="showGTab('login')">← Retour à la connexion</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="app-screen">
+  <div id="offbanner">⚠ Hors ligne — Certaines fonctionnalités indisponibles</div>
+  <div class="ah">
+    <div class="al"><div class="ab">N</div><div class="at">NIM <span>Pro</span></div></div>
+    <div class="hr">
+      <div class="ib" onclick="toggleSys()">⚙</div>
+      <div class="ib" onclick="showNav('history')">📋</div>
+      <div class="ib" id="admin-btn" onclick="showNav('admin')" style="display:none;">🔑</div>
+    </div>
+  </div>
+  <div class="sb">
+    <div class="sd"></div>
+    <div class="st" id="stt">Connecté · prêt</div>
+    <div class="pb free" id="pbadge">GRATUIT</div>
+  </div>
+
+  <!-- QUOTA — affiché aussi en PRO pour Claude (ne se reset pas) -->
+  <div id="qb">
+    <div class="qr">
+      <span class="ql" id="qlabel">Utilisation · fenêtre 1h</span>
+      <span class="qv ok" id="qval">0K / 10K tokens</span>
+    </div>
+    <div class="qt"><div class="qf" id="qfill" style="width:0%;background:var(--green)"></div></div>
+    <div class="qrst" id="qrst">Fenêtre glissante · 1 heure</div>
+  </div>
+
+  <div class="sysp" id="sysp">
+    <textarea id="sysarea" placeholder="Ex: Tu es un assistant marketing expert. Réponds en français, de façon concise." rows="3"></textarea>
+    <div class="syr"><span class="syl">System prompt</span><button class="sys-save" onclick="saveSys()">✓ Appliquer</button></div>
+  </div>
+
+  <!-- LIMIT WALL -->
+  <div id="lw">
+    <div class="lc">
+      <div class="li">⏱</div>
+      <div class="lt">Limite atteinte</div>
+      <div class="ls">Ta limite gratuite est atteinte.<br>Réinitialisation dans :</div>
+      <div class="ltimer" id="ltimer">60:00</div>
+      <div id="lw-upgrade-section" style="display:none;margin-bottom:12px;">
+        <button onclick="openUpgradeModal()" class="lup">⚡ Passer en Pro — illimité</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;">Messages illimités · Claude + fal.ai + Gemini</div>
+      </div>
+      <button onclick="continueWaiting()" style="width:100%;background:transparent;border:1px solid var(--bdr);color:var(--muted);font-family:Outfit,sans-serif;font-size:14px;font-weight:600;padding:12px;border-radius:10px;cursor:pointer;">Continuer d'attendre</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Tes tokens se libèrent automatiquement</div>
+    </div>
+  </div>
+
+  <div id="msgs">
+    <div class="welcome" id="welc">
+      <div class="wi">⚡</div>
+      <h2 id="wtit">NIM Studio Pro</h2>
+      <p id="wsub">Sélectionne un modèle et commence.</p>
+      <button onclick="openUpgradeModal()" class="uchip" id="uchip" style="display:none;">⚡ Passer en Pro — illimité</button>
+    </div>
+  </div>
+
+  <!-- INPUT AREA : modèle inline + durée vidéo + prompt -->
+  <div class="iw">
+    <div class="iw-top">
+      <div class="ms-wrap">
+        <select class="ms-mini" id="msel" onchange="onMC()">
+          <!-- rempli dynamiquement par buildModelSelect() -->
+        </select>
+        <span class="ms-arr">▾</span>
+      </div>
+      <div class="dur-wrap">
+        <select class="dur-sel" id="dur-sel">
+          <option value="5">5s</option>
+          <option value="10">10s</option>
+          <option value="20">20s</option>
+          <option value="60">60s / 1min</option>
+        </select>
+        <span class="dur-arr">▾</span>
+      </div>
+    </div>
+    <div class="iw-row">
+      <textarea id="prompt" placeholder="Message…" rows="1"></textarea>
+      <button id="sb2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="bnav">
+    <button class="ni active" id="nc1" onclick="showNav('chat')"><div class="ni-icon">💬</div><div class="ni-lbl">Chat</div></button>
+    <button class="ni" id="nh1" onclick="showNav('history')"><div class="ni-icon">📋</div><div class="ni-lbl">Historique</div></button>
+    <button class="ni" id="ns1" onclick="showNav('settings')"><div class="ni-icon">⚙️</div><div class="ni-lbl">Réglages</div></button>
+  </nav>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="history-screen">
+  <div class="ah"><div class="al"><div class="ab">N</div><div class="at">Histori<span>que</span></div></div><div class="hr"><div class="ib" onclick="clearHist()">🗑</div></div></div>
+  <div class="hcont"><div id="hlist"></div></div>
+  <nav class="bnav">
+    <button class="ni" id="nc2" onclick="showNav('chat')"><div class="ni-icon">💬</div><div class="ni-lbl">Chat</div></button>
+    <button class="ni active" id="nh2" onclick="showNav('history')"><div class="ni-icon">📋</div><div class="ni-lbl">Historique</div></button>
+    <button class="ni" id="ns2" onclick="showNav('settings')"><div class="ni-icon">⚙️</div><div class="ni-lbl">Réglages</div></button>
+  </nav>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="settings-screen">
+  <div class="ah"><div class="al"><div class="ab">N</div><div class="at">Régl<span>ages</span></div></div></div>
+  <div class="scont">
+    <div id="pcwrap"></div>
+    <div class="ssec">
+      <div class="sslbl">Modèle IA</div>
+      <div class="scard">
+        <div class="srow"><div class="srl"><div class="sri">🤖</div><div><div class="srlbl">Modèle actif</div><div class="srsub" id="smod">—</div></div></div></div>
+        <div class="srow"><div class="srl"><div class="sri">🌡️</div><div><div class="srlbl">Température</div><div class="srsub">Créativité</div></div></div><div class="srr"><input type="range" id="tsl" min="0" max="100" value="70" style="width:80px;accent-color:var(--green);" oninput="updTemp(this.value)"><span id="tval" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--green);min-width:28px;">0.7</span></div></div>
+        <div class="srow"><div class="srl"><div class="sri">📏</div><div><div class="srlbl">Longueur max</div><div class="srsub">Tokens / réponse</div></div></div><div class="srr"><select id="tksel" style="background:var(--s2);border:1px solid var(--bdr);color:var(--txt);font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border-radius:6px;outline:none;-webkit-appearance:none;"><option value="512">512</option><option value="1024" selected>1024</option><option value="2048">2048</option><option value="4096">4096</option></select></div></div>
+      </div>
+    </div>
+    <div class="ssec">
+      <div class="sslbl">Préférences</div>
+      <div class="scard">
+        <div class="srow"><div class="srl"><div class="sri">⌨️</div><div><div class="srlbl">Entrée = Envoyer</div><div class="srsub">Clavier physique</div></div></div><label class="tog"><input type="checkbox" id="etog" checked><span class="togsl"></span></label></div>
+        <div class="srow"><div class="srl"><div class="sri">💾</div><div><div class="srlbl">Sauvegarder l'historique</div><div class="srsub">Conversations locales</div></div></div><label class="tog"><input type="checkbox" id="htog" checked><span class="togsl"></span></label></div>
+      </div>
+    </div>
+    <div class="ssec">
+      <div class="sslbl">Compte</div>
+      <div class="scard">
+        <div class="srow"><div class="srl"><div class="sri">📧</div><div><div class="srlbl">Email connecté</div><div class="srsub" id="skey">—</div></div></div></div>
+        <div class="srow"><div class="srl"><div class="sri">✉️</div><div><div class="srlbl">Support</div><div class="srsub">shopova@gmail.com</div></div></div><div class="srr"><a href="mailto:shopova@gmail.com" style="color:var(--green);font-size:12px;text-decoration:none;">→</a></div></div>
+      </div>
+    </div>
+    <div class="ssec"><button class="bdanger" onclick="doLogout()">Se déconnecter</button></div>
+    <div style="text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding-bottom:20px;">NIM Studio Pro v4.0 · NexusAI Agency</div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" id="nc3" onclick="showNav('chat')"><div class="ni-icon">💬</div><div class="ni-lbl">Chat</div></button>
+    <button class="ni" id="nh3" onclick="showNav('history')"><div class="ni-icon">📋</div><div class="ni-lbl">Historique</div></button>
+    <button class="ni active" id="ns3" onclick="showNav('settings')"><div class="ni-icon">⚙️</div><div class="ni-lbl">Réglages</div></button>
+  </nav>
+</div>
+
+<!-- ADMIN -->
+<div class="screen" id="admin-screen">
+  <div class="ah"><div class="al"><div class="ab">🔑</div><div class="at">Admin <span>Panel</span></div></div></div>
+  <div class="acont">
+    <div class="admin-title">Dashboard Admin</div>
+    <div class="admin-sub">Clés API · Crédits · Consommation</div>
+
+    <!-- ANTHROPIC -->
+    <div class="credit-card">
+      <div class="cc-head">
+        <div class="cc-name">🤖 Anthropic Claude</div>
+        <div class="cc-price" id="admin-claude-price">$3–25/MTok</div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-row"><span class="cbar-label">Crédits utilisés (estimé)</span><span class="cbar-val" id="admin-claude-used">~$0.00</span></div>
+        <div class="cbar"><div class="cbar-fill" id="admin-claude-bar" style="width:5%;background:var(--green);"></div></div>
+      </div>
+      <div class="admin-key-section">
+        <div class="admin-section-title">Clé API</div>
+        <div class="key-row">
+          <div class="key-label">ANTHROPIC_API_KEY</div>
+          <input type="password" class="key-input" id="admin-anthropic-key" placeholder="sk-ant-..." autocomplete="off">
+          <button class="key-save" onclick="saveAdminKey('anthropic')">💾 Sauvegarder</button>
+        </div>
+      </div>
+      <div class="cc-actions">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" class="cc-btn primary">+ Recharger</a>
+        <a href="https://console.anthropic.com" target="_blank" class="cc-btn secondary">Dashboard →</a>
+      </div>
+    </div>
+
+    <!-- FAL.AI -->
+    <div class="credit-card">
+      <div class="cc-head">
+        <div class="cc-name">🎨 fal.ai</div>
+        <div class="cc-price" id="admin-fal-price">$0.003–0.50/output</div>
+      </div>
+      <div class="cbar-wrap">
+        <div class="cbar-row"><span class="cbar-label">Crédits utilisés (estimé)</span><span class="cbar-val" id="admin-fal-used">~$0.00</span></div>
+        <div class="cbar"><div class="cbar-fill" id="admin-fal-bar" style="width:3%;background:var(--green);"></div></div>
+      </div>
+      <div class="admin-key-section">
+        <div class="admin-section-title">Clé API</div>
+        <div class="key-row">
+          <div class="key-label">FAL_API_KEY</div>
+          <input type="password" class="key-input" id="admin-fal-key" placeholder="fal-..." autocomplete="off">
+          <button class="key-save" onclick="saveAdminKey('fal')">💾 Sauvegarder</button>
+        </div>
+      </div>
+      <div class="cc-actions">
+        <a href="https://fal.ai/dashboard/billing" target="_blank" class="cc-btn primary">+ Recharger</a>
+        <a href="https://fal.ai/dashboard" target="_blank" class="cc-btn secondary">Dashboard →</a>
+      </div>
+    </div>
+
+    <!-- GEMINI -->
+    <div class="credit-card">
+      <div class="cc-head">
+        <div class="cc-name">✦ Google Gemini</div>
+        <div class="cc-price">Gratuit (API Key)</div>
+      </div>
+      <div class="admin-key-section">
+        <div class="admin-section-title">Clé API 1</div>
+        <div class="key-row">
+          <div class="key-label">GEMINI_API_KEY</div>
+          <input type="password" class="key-input" id="admin-gemini-key" placeholder="AIzaSy..." autocomplete="off">
+          <button class="key-save" onclick="saveAdminKey('gemini')">💾 Sauvegarder</button>
+        </div>
+      </div>
+      <div class="cc-actions">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="cc-btn primary">Obtenir une clé</a>
+        <a href="https://console.cloud.google.com" target="_blank" class="cc-btn secondary">Console →</a>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:10px 0 20px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Les clés sont chiffrées localement · Ne partage jamais ce panel</div>
+  </div>
+  <nav class="bnav">
+    <button class="ni" onclick="showNav('chat')"><div class="ni-icon">💬</div><div class="ni-lbl">Chat</div></button>
+    <button class="ni" onclick="showNav('settings')"><div class="ni-icon">⚙️</div><div class="ni-lbl">Réglages</div></button>
+    <button class="ni active"><div class="ni-icon">🔑</div><div class="ni-lbl">Admin</div></button>
+  </nav>
+</div>
+
+<!-- VIDEO CUT POPUP -->
+<div role="dialog" aria-modal="true" class="popup-bg" id="cut-popup">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title">Découper la vidéo</div>
+    <div class="popup-sub" id="cut-popup-sub">Vidéo de 60s → Sélectionne la découpe</div>
+    <div id="cut-options"></div>
+    <div class="popup-actions">
+      <button class="popup-cancel" onclick="closeCutPopup()">Annuler</button>
+      <button class="popup-confirm" onclick="confirmCut()">Générer les clips ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div role="dialog" aria-modal="true" class="cbg" id="cbg">
+  <div class="csh">
+    <div class="chandl"></div>
+    <h3 id="ctit">Confirmer</h3><p id="cmsg">Es-tu sûr ?</p>
+    <div class="cbtns"><button class="ccan" onclick="closeCon()">Annuler</button><button class="cok" id="cokb">Confirmer</button></div>
+  </div>
+</div>
+
+<!-- INSTALL PWA — Banner style Télé-Loisirs (top, non-bloquant) -->
+<!-- FIX [4e]: remplace le popup plein écran qui gelait l'application -->
+<!-- Remplace depuis <div role="dialog" aria-modal="true" id="instprompt" jusqu'au </style> suivant inclus -->
+
+<div role="dialog" aria-modal="true" id="instprompt" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;pointer-events:none;">
+  <div style="background:#0F1018;border-radius:24px 24px 0 0;padding:20px 20px 40px;pointer-events:all;box-shadow:0 -8px 48px rgba(0,0,0,.85);animation:instUp .42s cubic-bezier(.34,1.1,.64,1);">
+    <div style="width:40px;height:4px;background:#2A2D3E;border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+      <div style="width:58px;height:58px;background:linear-gradient(135deg,#7ED8B4,#2D9E72);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 4px 18px rgba(75,184,150,.4);">N</div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#fff;font-family:'Outfit',sans-serif;">NIM Studio Pro</div>
+        <div style="font-size:12px;color:#6B7099;margin-top:3px;font-family:'DM Mono',monospace;">Claude · FLUX · Kling · Sora</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+      <span style="background:#1A1D2E;border:1px solid #2A2D3E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:#7ED8B4;">🤖 Claude</span>
+      <span style="background:#1A1D2E;border:1px solid #2A2D3E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:#7ED8B4;">🎨 FLUX</span>
+      <span style="background:#1A1D2E;border:1px solid #2A2D3E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:#7ED8B4;">🎬 Kling</span>
+      <span style="background:#1A1D2E;border:1px solid #2A2D3E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:#7ED8B4;">⚡ Sora</span>
+      <span style="background:#1A1D2E;border:1px solid #2A2D3E;border-radius:20px;padding:6px 13px;font-size:12px;font-weight:600;color:#7ED8B4;">📶 Offline</span>
+    </div>
+    <button id="ip-btn" onclick="doInstallPWA()" style="width:100%;background:linear-gradient(135deg,#4BB896,#2D9E72);color:#000;border:none;font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;padding:18px;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 24px rgba(75,184,150,.45);margin-bottom:10px;">
+      <span id="ip-icon" style="font-size:20px;">📱</span>
+      <span id="ip-text">Installer sur mon téléphone</span>
+    </button>
+    <div id="ip-progress" style="display:none;width:100%;height:4px;background:#1A1D2E;border-radius:2px;margin-bottom:12px;overflow:hidden;">
+      <div style="height:100%;background:linear-gradient(90deg,#4BB896,#7ED8B4);animation:ipLoad 1.5s linear infinite;"></div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:#4B5070;font-family:'DM Mono',monospace;margin-bottom:12px;">Cache prêt · Offline OK ✓</div>
+    <button onclick="skipInstall()" style="width:100%;background:none;border:none;color:#4BB896;font-family:'Outfit',sans-serif;font-size:14px;padding:6px;cursor:pointer;">Ouvrir sans installer →</button>
+    <div id="ip-ios" style="display:none;background:#1A1D2E;border-radius:12px;padding:16px;margin-top:14px;border:1px solid #2A2D3E;">
+      <div style="font-size:11px;font-weight:700;color:#4BB896;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Ajouter à l'écran d'accueil — Safari</div>
+      <div style="padding:7px 0;border-bottom:1px solid #2A2D3E;font-size:13px;color:#C9CDD9;">1. Appuie sur <b style="color:#4BB896;">Partager ↑</b> en bas de Safari</div>
+      <div style="padding:7px 0;border-bottom:1px solid #2A2D3E;font-size:13px;color:#C9CDD9;">2. Défile → <b style="color:#4BB896;">«Sur l'écran d'accueil»</b></div>
+      <div style="padding:7px 0;font-size:13px;color:#C9CDD9;">3. Appuie sur <b style="color:#4BB896;">«Ajouter»</b> 🚀</div>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes instDrop { from{transform:translateY(-110%);opacity:0;} to{transform:translateY(0);opacity:1;} }
+@keyframes instUp   { from{transform:translateY(100%);} to{transform:translateY(0);} }
+@keyframes ipLoad   { 0%{transform:translateX(-100%);} 100%{transform:translateX(400%);} }
+</style>
+
+<script src="config.js"></script>
+<script>
+// ============================================================
+// SUPABASE INIT
+// ============================================================
+let sb = null;
+try {
+  if (window.supabase && typeof CONFIG !== 'undefined')
+    sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+} catch(e) { console.warn('Supabase:', e); }
+
+let plan = 'free', ukey = null, hist = [], sysp = '', busy = false, sysOpen = false;
+let temp = 0.7, maxTok = 1024, dip = null, convs = [];
+let quota = { events: [] };
+let _falCostTotal = 0, _claudeTokensTotal = 0;
+
+// ============================================================
+// SPLASH
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // ── Service Worker ────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        if (reg.waiting) showUpdatePopup(reg.waiting);
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing; if (!nw) return;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdatePopup(nw);
+          });
+        });
+      }).catch(() => {});
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'SW_UPDATE_READY') showUpdatePopup(null, e.data);
+    });
+    let _refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_refreshing) return; _refreshing = true; window.location.reload();
+    });
+  }
+
+  // ── Offline banner ────────────────────────────────────────
+  window.addEventListener('offline', () => document.getElementById('offbanner').classList.add('show'));
+  window.addEventListener('online',  () => document.getElementById('offbanner').classList.remove('show'));
+  if (!navigator.onLine) document.getElementById('offbanner').classList.add('show');
+
+  // ── Install prompt ────────────────────────────────────────
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); dip = e;
+    if (!localStorage.getItem('nim_idm')) setTimeout(() => showInstallPopup(), 1400); // FIX [4a]
+  });
+  const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const _isIOSSafari = _isIOS && !window.navigator.standalone && /safari/i.test(navigator.userAgent);
+  const _isStandalone = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone === true;
+  if (_isIOSSafari && !_isStandalone && !localStorage.getItem('nim_idm')) {
+    setTimeout(() => showInstallPopup(), 1600); // FIX [4a] iOS
+  }
+
+  // ── SPLASH : max 1.5 secondes puis on passe ───────────────
+  initApp();
+});
+
+async function initApp() {
+  // 🔒 SAFETY TIMEOUT réduit à 2.5s : si splash bloqué → forcer la gate
+  const _splashGuard = setTimeout(() => {
+    const sp = document.getElementById('splash');
+    if (sp && sp.classList.contains('active')) {
+      console.warn('[NIM] Splash bloqué → gate forcée');
+      showScr('gate-screen');
+    }
+  }, 2500);
+
+  try {
+    // restoreSavedKeys ne doit JAMAIS bloquer le splash
+    try { restoreSavedKeys(); } catch(e) { console.warn('[NIM] restoreSavedKeys failed:', e); }
+
+    // Délai minimal animation splash (1.2s)
+    await new Promise(r => setTimeout(r, 1200));
+
+    // 1. Plan sauvegardé en localStorage → direct dans l'app
+    const savedPlan = localStorage.getItem('nim_plan');
+    const savedEmail = localStorage.getItem('nim_email');
+    if (savedPlan === 'free' || savedPlan === 'pro' || savedPlan === 'admin') {
+      clearTimeout(_splashGuard);
+      enterApp(savedPlan, savedEmail);
+      return;
+    }
+
+    // 2. Session Supabase active → récupérer le plan (timeout 1.5s)
+    if (sb) {
+      try {
+        const { data } = await Promise.race([
+          sb.auth.getSession(),
+          new Promise((_,rej) => setTimeout(() => rej(new Error('timeout')), 1500))
+        ]);
+        if (data?.session?.user) {
+          clearTimeout(_splashGuard);
+          await resolveUserPlan(data.session.user);
+          return;
+        }
+      } catch(e) { console.warn('[NIM] Supabase session timeout:', e.message); }
+    }
+
+    // 3. Rien trouvé → écran de connexion
+    clearTimeout(_splashGuard);
+    showScr('gate-screen');
+
+  } catch(e) {
+    console.error('[NIM] initApp crash:', e);
+    clearTimeout(_splashGuard);
+    showScr('gate-screen');
+  }
+}
+
+// ============================================================
+// PLAN CHECK — v4.2 : lit depuis public.profiles (pas access_keys)
+// ============================================================
+async function resolveUserPlan(user) {
+  if (!sb) { enterApp('free', user.email); return; }
+  try {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('plan, subscription_status, subscription_expires_at')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('[NIM] resolveUserPlan error:', error);
+      enterApp('free', user.email);
+      return;
+    }
+
+    if (!data) {
+      console.warn('[NIM] No profile found for user, defaulting to free');
+      enterApp('free', user.email);
+      return;
+    }
+
+    // Vérifier expiration subscription si elle existe
+    if (data.subscription_expires_at && new Date(data.subscription_expires_at) < new Date()) {
+      console.log('[NIM] Subscription expirée, fallback free');
+      enterApp('free', user.email);
+      return;
+    }
+
+    // plan = 'admin', 'pro' ou 'free'
+    console.log('[NIM] Plan résolu:', data.plan);
+    enterApp(data.plan || 'free', user.email);
+
+  } catch (e) {
+    console.error('[NIM] resolveUserPlan crash:', e);
+    enterApp('free', user.email);
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScr(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showNav(t) {
+  const map = { chat:'app-screen', history:'history-screen', settings:'settings-screen', admin:'admin-screen' };
+  showScr(map[t] || 'app-screen');
+  [['nc','chat'],['nh','history'],['ns','settings']].forEach(([p,k]) => {
+    [1,2,3].forEach(n => { const el=document.getElementById(p+n); if(el) el.classList.toggle('active', t===k); });
+  });
+  if (t === 'history') renderHist();
+  if (t === 'settings') renderSet();
+  if (t === 'admin') renderAdmin();
+}
+
+// ============================================================
+// GATE TABS
+// ============================================================
+function showGTab(t) {
+  document.getElementById('gt-login').style.display  = t==='login'  ? 'block' : 'none';
+  document.getElementById('gt-signup').style.display = t==='signup' ? 'block' : 'none';
+  document.getElementById('gt-forgot').style.display = t==='forgot' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-signup').classList.toggle('active', t==='signup');
+  document.getElementById('g-tabs-bar').style.display = t==='forgot' ? 'none' : 'flex';
+  ['login-msg','signup-msg','forgot-msg'].forEach(id => { const el=document.getElementById(id); if(el){el.textContent='';el.className='gmsg';} });
+}
+function setMsg(id,type,txt) { const el=document.getElementById(id); if(!el)return; el.textContent=txt; el.className='gmsg '+(type==='err'?'err':type==='ok'?'ok':''); }
+function setBtnLoad(id,loading,def) { const b=document.getElementById(id); if(!b)return; b.disabled=loading; b.textContent=loading?'⏳ Chargement…':def; }
+
+// ============================================================
+// AUTH
+// ============================================================
+async function doLogin() {
+  const email=document.getElementById('login-email').value.trim();
+  const pwd  =document.getElementById('login-password').value;
+  if (!email||!pwd) { setMsg('login-msg','err','❌ Remplis tous les champs'); return; }
+  setBtnLoad('login-btn',true,'Se connecter →');
+  setMsg('login-msg','','⏳ Vérification…');
+  if (typeof CONFIG !== 'undefined' && CONFIG.checkProAccount(email,pwd)) {
+    setMsg('login-msg','ok','✅ Accès Pro activé !');
+    setBtnLoad('login-btn',false,'Se connecter →');
+    setTimeout(()=>enterApp('pro',email.trim().toLowerCase()), 350);
+    return;
+  }
+  if (!sb) { setMsg('login-msg','err','❌ Email ou mot de passe incorrect'); setBtnLoad('login-btn',false,'Se connecter →'); return; }
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password:pwd });
+    if (error) {
+      let m = '❌ Email ou mot de passe incorrect';
+      if (error.message?.includes('Email not confirmed')) m = '❌ Confirme ton email avant de te connecter';
+      setMsg('login-msg','err',m); setBtnLoad('login-btn',false,'Se connecter →'); return;
+    }
+    setMsg('login-msg','ok','✅ Connecté !');
+    await resolveUserPlan(data.user);
+  } catch { setMsg('login-msg','err','❌ Erreur réseau'); setBtnLoad('login-btn',false,'Se connecter →'); }
+}
+
+async function doSignup() {
+  if (!sb) { setMsg('signup-msg','err','❌ Service indisponible'); return; }
+  const email=document.getElementById('signup-email').value.trim();
+  const pwd  =document.getElementById('signup-password').value;
+  const conf =document.getElementById('signup-confirm').value;
+  if (!email||!pwd) { setMsg('signup-msg','err','❌ Remplis tous les champs'); return; }
+  if (pwd.length<8) { setMsg('signup-msg','err','❌ Mot de passe minimum 8 caractères'); return; }
+  if (pwd!==conf)   { setMsg('signup-msg','err','❌ Les mots de passe ne correspondent pas'); return; }
+  setBtnLoad('signup-btn',true,'Créer mon compte →');
+  setMsg('signup-msg','','⏳ Création du compte…');
+  try {
+    const { error } = await sb.auth.signUp({ email, password:pwd });
+    if (error) {
+      let m = '❌ '+error.message;
+      if (error.message.includes('already registered')) m = '❌ Email déjà utilisé — connecte-toi';
+      setMsg('signup-msg','err',m); setBtnLoad('signup-btn',false,'Créer mon compte →'); return;
+    }
+    setMsg('signup-msg','ok','✅ Compte créé ! Vérifie ton email pour confirmer.');
+    document.getElementById('signup-btn').textContent = 'Email envoyé ✓';
+  } catch { setMsg('signup-msg','err','❌ Erreur réseau'); setBtnLoad('signup-btn',false,'Créer mon compte →'); }
+}
+
+async function doForgot() {
+  if (!sb) { setMsg('forgot-msg','err','❌ Service indisponible'); return; }
+  const email=document.getElementById('forgot-email').value.trim();
+  if (!email) { setMsg('forgot-msg','err','❌ Entre ton email'); return; }
+  setBtnLoad('forgot-btn',true,'Envoyer le lien →');
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: CONFIG.APP_URL+'app.html' });
+    if (error) { setMsg('forgot-msg','err','❌ '+error.message); setBtnLoad('forgot-btn',false,'Envoyer le lien →'); return; }
+    setMsg('forgot-msg','ok','✅ Lien envoyé ! Vérifie ton email.');
+    document.getElementById('forgot-btn').textContent = 'Email envoyé ✓';
+  } catch { setMsg('forgot-msg','err','❌ Erreur réseau'); setBtnLoad('forgot-btn',false,'Envoyer le lien →'); }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  if (!document.getElementById('gate-screen').classList.contains('active')) return;
+  if (document.getElementById('gt-login').style.display!=='none') doLogin();
+  else if (document.getElementById('gt-signup').style.display!=='none') doSignup();
+  else if (document.getElementById('gt-forgot').style.display!=='none') doForgot();
+});
+
+function enterFree() { localStorage.setItem('nim_plan','free'); localStorage.removeItem('nim_email'); enterApp('free',null); }
+
+// ============================================================
+// ENTER APP — persistance sans rechargement
+// ============================================================
+function enterApp(p, emailOrNull) {
+  plan = p; ukey = emailOrNull;
+  // Persister pour éviter rechargement
+  localStorage.setItem('nim_plan', p);
+  if (emailOrNull) localStorage.setItem('nim_email', emailOrNull);
+  else localStorage.removeItem('nim_email');
+
+  loadQ();
+  sysp = localStorage.getItem('nim_sys') || '';
+  if (sysp) document.getElementById('sysarea').value = sysp;
+  temp   = parseFloat(localStorage.getItem('nim_temp') || '0.7');
+  maxTok = parseInt(localStorage.getItem('nim_tok') || '1024');
+  try { convs = JSON.parse(localStorage.getItem('nim_convs') || '[]'); } catch { convs = []; }
+
+  // Build model select
+  buildModelSelect();
+
+  // Affichage plan
+  const badge = document.getElementById('pbadge');
+  if (p === 'admin') {
+    badge.textContent = 'ADMIN'; badge.className = 'pb pro';
+    badge.style.background = '#FF9F43'; badge.style.color = '#000';
+    document.getElementById('wtit').textContent = 'Bienvenue Admin 👑';
+    document.getElementById('wsub').textContent = 'Accès illimité · Tous modèles · Dashboard admin disponible';
+    document.getElementById('uchip').style.display = 'none';
+    const adminBtn = document.getElementById('admin-btn');
+    if (adminBtn) adminBtn.style.display = 'flex';
+    document.getElementById('qb').style.display = 'block';
+    document.getElementById('qlabel').textContent = 'Tokens cumulés · session';
+  } else if (p === 'pro') {
+    badge.textContent = 'PRO'; badge.className = 'pb pro';
+    document.getElementById('wtit').textContent = 'Bienvenue en Pro ⚡';
+    document.getElementById('wsub').textContent = 'Claude + fal.ai + Gemini · Images · Vidéos · Texte illimité';
+    document.getElementById('uchip').style.display = 'none';
+    var _adm = CONFIG.PRO_ACCOUNTS.find(function(ac){return ac.email.toLowerCase()===(emailOrNull||'').toLowerCase();});
+    if (_adm && _adm.isAdmin) {
+      document.getElementById('admin-btn').style.display = 'flex';
+    }
+    // Afficher quota aussi en pro (pour Claude token tracking)
+    document.getElementById('qb').style.display = 'block';
+    document.getElementById('qlabel').textContent = 'Tokens Claude · cumul session';
+  } else {
+    badge.textContent = 'GRATUIT'; badge.className = 'pb free';
+    document.getElementById('qb').style.display = 'block';
+    document.getElementById('qlabel').textContent = 'Utilisation · fenêtre 1h';
+    document.getElementById('wsub').textContent = 'Claude Haiku + Gemini Free + fal.ai gratuit · Passe Pro pour débloquer tout';
+    document.getElementById('uchip').style.display = 'inline-flex';
+    const adminBtn = document.getElementById('admin-btn');
+    if (adminBtn) adminBtn.style.display = 'none';
+    updQUI();
+  }
+
+  showScr('app-screen');
+
+  const pr = document.getElementById('prompt');
+  pr.addEventListener('keydown', e => {
+    if (e.key==='Enter' && !e.shiftKey && document.getElementById('etog')?.checked) { e.preventDefault(); send(); }
+  });
+  pr.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+  });
+}
+
+document.getElementById('sb2').addEventListener('click', () => send());
+
+// ============================================================
+// MODEL SELECT — construction dynamique
+// ============================================================
+function buildModelSelect() {
+  const sel = document.getElementById('msel');
+  sel.innerHTML = '';
+  const addOpt = (val, label, cls) => {
+    const o = document.createElement('option');
+    o.value = val; o.textContent = label;
+    if (cls) o.className = cls;
+    return o;
+  };
+  const addGrp = (label, ...opts) => {
+    const g = document.createElement('optgroup');
+    g.label = label;
+    opts.forEach(o => g.appendChild(o));
+    sel.appendChild(g);
+  };
+
+  // Claude
+  addGrp('🤖 Claude — Free', addOpt('claude:'+CONFIG.CLAUDE_MODEL_DEFAULT_FREE, 'Claude Haiku 4.5 ⚡'));
+  addGrp('🤖 Claude — Pro',
+    addOpt('claude:claude-sonnet-4-6', 'Claude Sonnet 4.6 ✦', 'opt-pro'),
+    addOpt('claude:claude-opus-4-6',   'Claude Opus 4.6 💎',  'opt-pro')
+  );
+  // Gemini
+  addGrp('✦ Gemini — Free',
+    addOpt('gemini:gemini-2.0-flash', 'Gemini 2.0 Flash ⚡'),
+    addOpt('gemini:gemini-1.5-flash', 'Gemini 1.5 Flash')
+  );
+  addGrp('✦ Gemini — Pro',
+    addOpt('gemini:gemini-2.5-pro',   'Gemini 2.5 Pro 💎',   'opt-pro'),
+    addOpt('gemini:gemini-2.5-flash', 'Gemini 2.5 Flash ✦',  'opt-pro')
+  );
+  // fal.ai Image
+  const imgFree = document.createElement('optgroup'); imgFree.label = '🎨 Image — Free';
+  const imgPro  = document.createElement('optgroup'); imgPro.label  = '🎨 Image — Pro';
+  CONFIG.FAL_IMAGE_MODELS.forEach(m => {
+    const o = addOpt('fal-img:'+m.id, m.label+' '+m.price, m.tier==='pro'?'opt-pro':'');
+    (m.tier==='pro' ? imgPro : imgFree).appendChild(o);
+  });
+  sel.appendChild(imgFree); sel.appendChild(imgPro);
+  // fal.ai Video
+  const vidFree = document.createElement('optgroup'); vidFree.label = '🎬 Vidéo — Free';
+  const vidPro  = document.createElement('optgroup'); vidPro.label  = '🎬 Vidéo — Pro';
+  CONFIG.FAL_VIDEO_MODELS.forEach(m => {
+    const o = addOpt('fal-vid:'+m.id, m.label+' '+m.price, m.tier==='pro'?'opt-pro':'');
+    (m.tier==='pro' ? vidPro : vidFree).appendChild(o);
+  });
+  sel.appendChild(vidFree); sel.appendChild(vidPro);
+
+  filterModelsByPlan();
+  // Set default
+  const def = plan==='pro' ? 'claude:claude-sonnet-4-6' : 'gemini:gemini-2.0-flash';
+  sel.value = def;
+  onMC();
+}
+
+function onMC() {
+  const sel = document.getElementById('msel');
+  const opt = sel.selectedOptions[0];
+  const [p] = sel.value.split(':');
+  const isProOpt = opt?.classList.contains('opt-pro');
+  if (isProOpt && plan !== 'pro') {
+    sel.value = 'gemini:gemini-2.0-flash';
+    addMsg('ai','⚠️ Ce modèle est réservé au plan Pro. Passe en Pro via index.html.');
+  }
+  // Afficher/cacher durée vidéo
+  const isVid = p === 'fal-vid';
+  const durSel = document.getElementById('dur-sel');
+  durSel.className = isVid ? 'dur-sel show' : 'dur-sel';
+  // Ajuster les options de durée selon le modèle choisi
+  if (isVid) {
+    const modelId = sel.value.split(':').slice(1).join(':');
+    const modelDef = CONFIG.FAL_VIDEO_MODELS.find(m => m.id === modelId);
+    const max = modelDef ? modelDef.maxDuration : 60;
+    updateDurOptions(max);
+    updateQualityInfo(modelDef);
+  }
+}
+
+function updateDurOptions(maxSec) {
+  const dur = document.getElementById('dur-sel');
+  const prev = parseInt(dur.value)||5;
+  const options = [5,10,20,60].filter(v => v <= maxSec);
+  dur.innerHTML = options.map(v => `<option value="${v}"${v===prev&&v<=maxSec?' selected':''}>${v>=60?'60s / 1min':v+'s'}</option>`).join('');
+}
+
+function updateQualityInfo(model) {
+  if (!model) return;
+  const st = document.getElementById('stt');
+  if (st) st.textContent = `${model.label} · Max ${model.maxDuration}s · ${model.qualities?.join(' / ')||''} · ${model.price}`;
+  setTimeout(()=>{ if(st) st.textContent='Connecté · prêt'; }, 3000);
+}
+
+function filterModelsByPlan() {
+  const sel = document.getElementById('msel');
+  if (!sel) return;
+  sel.querySelectorAll('optgroup').forEach(grp => {
+    const isPro = grp.label.includes('Pro');
+    if (plan==='free') { grp.style.display=isPro?'none':''; grp.querySelectorAll('option').forEach(o=>{ if(isPro) o.disabled=true; }); }
+    else               { grp.style.display=''; grp.querySelectorAll('option').forEach(o=>{ o.disabled=false; }); }
+  });
+}
+
+// ============================================================
+// QUOTA TOKENS (persiste entre sessions, ne se reset pas en Pro)
+// ============================================================
+const WINDOW_MS = CONFIG.FREE_RESET_MINUTES * 60 * 1000;
+const FREE_TOKEN_LIMIT = CONFIG.FREE_TOKEN_LIMIT_PER_HOUR || 20000;
+let exhaustCount = parseInt(localStorage.getItem('nim_exhaust')||'0');
+let upgradeShown = parseInt(localStorage.getItem('nim_upgshown')||'0');
+
+function onQuotaExhausted() {
+  exhaustCount++; localStorage.setItem('nim_exhaust', exhaustCount);
+  const show = (exhaustCount%2===0) && upgradeShown<3;
+  if (show) { upgradeShown++; localStorage.setItem('nim_upgshown',upgradeShown); document.getElementById('lw-upgrade-section').style.display='block'; }
+  else { document.getElementById('lw-upgrade-section').style.display='none'; }
+  document.getElementById('lw').classList.add('show');
+}
+function continueWaiting() { document.getElementById('lw').classList.remove('show'); }
+function loadQ() {
+  try { const s=localStorage.getItem('nim_quota_tokens'); quota=s?JSON.parse(s):{events:[]}; if(!Array.isArray(quota.events)) quota={events:[]}; }
+  catch { quota={events:[]}; }
+}
+function saveQ() { localStorage.setItem('nim_quota_tokens', JSON.stringify(quota)); }
+function getActiveEvents() { const now=Date.now(); quota.events=(quota.events||[]).filter(e=>now-e.ts<WINDOW_MS); return quota.events; }
+function getUsedTokens() { return getActiveEvents().reduce((s,e)=>s+e.tokens,0); }
+function isLim() { getActiveEvents(); saveQ(); return plan==='free' && getUsedTokens()>=FREE_TOKEN_LIMIT; }
+function addTokens(txt) { const t=Math.ceil(txt.length/4); getActiveEvents(); quota.events.push({ts:Date.now(),tokens:t}); saveQ(); _claudeTokensTotal+=t; return t; }
+function getRms() { const a=getActiveEvents(); if(!a.length) return 0; return Math.max(0,WINDOW_MS-(Date.now()-Math.min(...a.map(e=>e.ts)))); }
+function fms(ms) { const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000); return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+function pct() { return Math.min((getUsedTokens()/FREE_TOKEN_LIMIT)*100,100); }
+function updQUI() {
+  const used=getUsedTokens(), p=pct();
+  const f=document.getElementById('qfill'), v=document.getElementById('qval');
+  if (!f||!v) return;
+  if (plan==='pro') {
+    // En pro : afficher tokens Claude utilisés sans reset
+    const proUsed = _claudeTokensTotal;
+    f.style.width = Math.min(proUsed/5000*100,100)+'%';
+    f.style.background = 'var(--green)';
+    v.textContent = (proUsed/1000).toFixed(1)+'K tokens Claude · session';
+    v.className = 'qv ok';
+    const rst=document.getElementById('qrst'); if(rst) rst.textContent='Pas de limite · Pro illimité';
+    return;
+  }
+  f.style.width=p+'%'; f.style.background=p>=100?'var(--red)':p>=70?'var(--org)':'var(--green)';
+  v.textContent=(used/1000).toFixed(1)+'K / '+(FREE_TOKEN_LIMIT/1000).toFixed(0)+'K tokens';
+  v.className='qv '+(p>=100?'danger':p>=70?'warn':'ok');
+  const rst=document.getElementById('qrst'), ms=getRms(); if(!rst) return;
+  rst.textContent=used===0?'Fenêtre glissante · 1 heure':p>=100?'Réinitialisation dans '+fms(ms):'Fenêtre expire dans '+fms(ms);
+}
+
+setInterval(()=>{
+  updQUI();
+  const lw=document.getElementById('lw'), timer=document.getElementById('ltimer'), ms=getRms();
+  if (timer) timer.textContent=ms>0?fms(ms):'00:00';
+  if (lw && lw.classList.contains('show') && !isLim()) { lw.classList.remove('show'); updQUI(); }
+}, 1000);
+
+// ============================================================
+// CHAT HELPERS
+// ============================================================
+function addMsg(role, text) {
+  const msgs=document.getElementById('msgs');
+  const w=document.getElementById('welc'); if(w) w.style.display='none';
+  const d=document.createElement('div'); d.className='msg '+role;
+  const av=document.createElement('div'); av.className='av '+(role==='ai'?'ai':'me'); av.textContent=role==='ai'?'N':'M';
+  const b=document.createElement('div'); b.className='bub'; b.textContent=text;
+  d.appendChild(av); d.appendChild(b); msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+  return b;
+}
+function addTyp() {
+  const msgs=document.getElementById('msgs');
+  const d=document.createElement('div'); d.className='msg ai'; d.id='typ';
+  const av=document.createElement('div'); av.className='av ai'; av.textContent='N';
+  const b=document.createElement('div'); b.className='bub'; b.innerHTML='<div class="typdots"><span></span><span></span><span></span></div>';
+  d.appendChild(av); d.appendChild(b); msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+}
+function remTyp() { const e=document.getElementById('typ'); if(e) e.remove(); }
+function setSt(t) { const el=document.getElementById('stt'); if(el) el.textContent=t; }
+
+// ============================================================
+// SEND
+// ============================================================
+async function send() {
+  const promptEl=document.getElementById('prompt');
+  const text=promptEl.value.trim();
+  if (!text||busy) return;
+  if (plan==='free' && isLim()) { onQuotaExhausted(); return; }
+
+  busy=true; promptEl.value=''; promptEl.style.height='auto';
+  document.getElementById('sb2').disabled=true; setSt('Génération en cours…');
+  addMsg('user',text); addTyp();
+  hist.push({role:'user',content:text});
+  if (hist.length>20) hist=hist.slice(-20);
+
+  const sel=document.getElementById('msel');
+  const parts=sel.value.split(':');
+  const provider=parts[0], modelId=parts.slice(1).join(':');
+  let fullReply='';
+
+  const messages=[];
+  if (sysp) messages.push({role:'system',content:sysp});
+  messages.push(...hist.map(h=>({role:h.role==='user'?'user':'assistant',content:h.content})));
+
+  try {
+    // ── fal.ai IMAGE ──────────────────────────────────────────
+    if (provider==='fal-img') {
+      setSt('Génération image fal.ai…'); remTyp();
+      const url = await CONFIG.falGenerate('image', text, modelId);
+      if (!url) throw new Error('Aucune URL reçue de fal.ai');
+      const safeUrl = safeURL(url);
+      const el=addMsg('ai','');
+      el.innerHTML=`<img src="${escapeHTML(safeUrl)}" style="max-width:100%;border-radius:10px;margin-top:6px;" alt="Image générée"/><br><a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--green);text-decoration:none;">⬇ Télécharger l'image</a>`;
+      fullReply='[Image générée : '+url+']';
+      _falCostTotal += 0.05;
+
+    // ── fal.ai VIDÉO ──────────────────────────────────────────
+    } else if (provider==='fal-vid') {
+      const dur=parseInt(document.getElementById('dur-sel').value)||5;
+      const modelDef=CONFIG.FAL_VIDEO_MODELS.find(m=>m.id===modelId);
+      const maxDur=modelDef?modelDef.maxDuration:60;
+      const actualDur=Math.min(dur,maxDur);
+      setSt(`Génération vidéo ${actualDur}s — peut prendre 1–3 min…`); remTyp();
+      const url = await CONFIG.falGenerate('video', text, modelId, {duration:actualDur});
+      if (!url) throw new Error('Aucune URL reçue de fal.ai');
+      const safeUrl = safeURL(url);
+      const el=addMsg('ai','');
+      el.innerHTML=`<video src="${escapeHTML(safeUrl)}" controls playsinline style="max-width:100%;border-radius:10px;margin-top:6px;"></video><br><a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--green);text-decoration:none;">⬇ Télécharger la vidéo</a>`;
+      fullReply='[Vidéo générée : '+url+']';
+      const pricePerSec=modelDef?parseFloat(modelDef.price)||0.07:0.07;
+      _falCostTotal += actualDur*pricePerSec;
+      // Proposer découpe si dur > 10s
+      if (actualDur>=20) showCutPopupOffer(url, actualDur, modelDef);
+
+    // ── CLAUDE ────────────────────────────────────────────────
+    } else if (provider==='claude') {
+      setSt('Claude en cours…'); remTyp();
+      const reply = await CONFIG.claudeChat(messages, modelId, {max_tokens:maxTok});
+      fullReply = reply || '(Pas de réponse reçue)';
+      const b=addMsg('ai',''); b.textContent=fullReply;
+      addTokens(text+fullReply); updQUI();
+
+    // ── GEMINI ────────────────────────────────────────────────
+    } else {
+      const apiUrl = CONFIG.GEMINI_BASE_URL+'chat/completions';
+      let apiKey = CONFIG.getGeminiKey();
+      const makeReq=(key)=>fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:modelId,messages,max_tokens:maxTok,temperature:temp,stream:true})});
+      let res=await makeReq(apiKey);
+      if (!res.ok && res.status===429 && CONFIG.GEMINI_API_KEYS.length>1) {
+        for (let i=1;i<CONFIG.GEMINI_API_KEYS.length;i++) { const nk=CONFIG.rotateGeminiKey(); res=await makeReq(nk); if(res.ok) break; }
+      }
+      if (!res.ok) {
+        const et=await res.text(); const parsed=JSON.parse(et||'{}').error?.message||et.slice(0,200);
+        if (res.status===429) throw new Error('⏳ Gemini : quota atteint. Attends ~1h ou ajoute une clé dans config.js');
+        throw new Error('Gemini '+res.status+': '+parsed);
+      }
+      remTyp();
+      const bEl=addMsg('ai','');
+      const reader=res.body.getReader(), dec=new TextDecoder(); let buf='';
+      while(true) {
+        const {done,value}=await reader.read(); if(done) break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n'); buf=lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const d=line.slice(6).trim(); if(d==='[DONE]') break;
+          try { const j=JSON.parse(d); const ch=j.choices?.[0]?.delta?.content||''; if(ch){fullReply+=ch;bEl.textContent=fullReply;document.getElementById('msgs').scrollTop=99999;} } catch{}
+        }
+      }
+      if (!fullReply) {
+        const r2=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},body:JSON.stringify({model:modelId,messages,max_tokens:maxTok,temperature:temp,stream:false})});
+        if(r2.ok){const j2=await r2.json();fullReply=j2.choices?.[0]?.message?.content||'';if(fullReply)bEl.textContent=fullReply;}
+      }
+      if (!fullReply) fullReply='(Pas de réponse — réessaie)';
+      if (plan==='free') { addTokens(text+fullReply); updQUI(); }
+    }
+
+    hist.push({role:'assistant',content:fullReply});
+    if (document.getElementById('htog')?.checked) {
+      const modelLabel=sel.selectedOptions[0]?.text||modelId;
+      convs.unshift({ts:new Date().toLocaleString('fr-FR'),model:modelLabel,user:text.slice(0,80),ai:fullReply.slice(0,120)});
+      if(convs.length>50) convs=convs.slice(0,50);
+      localStorage.setItem('nim_convs',JSON.stringify(convs));
+    }
+    setSt('Connecté · prêt');
+
+  } catch(err) {
+    remTyp(); addMsg('ai','⚠️ Erreur : '+err.message); hist.pop(); setSt('Erreur — réessaie');
+    console.error(err);
+  }
+  busy=false; document.getElementById('sb2').disabled=false; promptEl.focus();
+}
+
+// ============================================================
+// VIDEO CUT POPUP
+// ============================================================
+let _cutVideoUrl = null, _cutSelectedOption = null;
+
+function showCutPopupOffer(url, totalSec, modelDef) {
+  _cutVideoUrl = url;
+  // Calcul des découpes possibles
+  const maxPerClip = modelDef?.maxDuration || 10;
+  const segments = [];
+  // ex: 60s → 6x10s ou 3x20s
+  for (const clipDur of [5,10,20,30]) {
+    if (clipDur > totalSec || clipDur > maxPerClip) continue;
+    const nClips = Math.ceil(totalSec/clipDur);
+    segments.push({clipDur, nClips, label:`${nClips} clips de ${clipDur}s`});
+  }
+  if (!segments.length) return;
+  document.getElementById('cut-popup-sub').textContent = `Vidéo ${totalSec}s → Choisir la découpe`;
+  const opts = document.getElementById('cut-options');
+  opts.innerHTML = '';
+  segments.forEach((s,i) => {
+    const d=document.createElement('div'); d.className='cut-option'; if(i===0) { d.classList.add('sel'); _cutSelectedOption=s; }
+    d.innerHTML=`<div><div class="cut-name">${s.label}</div><div class="cut-detail">${s.nClips}x génération · max ${s.clipDur}s chacun</div></div>${i===0?'<div class="cut-badge">Recommandé</div>':''}`;
+    d.onclick=()=>{ opts.querySelectorAll('.cut-option').forEach(o=>o.classList.remove('sel')); d.classList.add('sel'); _cutSelectedOption=s; };
+    opts.appendChild(d);
+  });
+  document.getElementById('cut-popup').classList.add('open');
+}
+
+async function confirmCut() {
+  if (!_cutSelectedOption) { closeCutPopup(); return; }
+  closeCutPopup();
+  const {clipDur, nClips} = _cutSelectedOption;
+  const sel=document.getElementById('msel');
+  const modelId=sel.value.split(':').slice(1).join(':');
+  addMsg('ai',`✂️ Découpe en ${nClips} clips de ${clipDur}s en cours…`);
+  for (let i=0;i<Math.min(nClips,6);i++) {
+    setSt(`Génération clip ${i+1}/${nClips}…`);
+    try {
+      const promptEl=document.getElementById('prompt');
+      const basePrompt=hist.filter(h=>h.role==='user').slice(-1)[0]?.content||'Clip vidéo';
+      const url=await CONFIG.falGenerate('video', basePrompt+` — partie ${i+1} sur ${nClips}`, modelId, {duration:clipDur});
+      if (url) {
+        const safeUrl = safeURL(url);
+        const el=addMsg('ai','');
+        el.innerHTML=`<b>Clip ${i+1}/${nClips}</b><br><video src="${escapeHTML(safeUrl)}" controls playsinline style="max-width:100%;border-radius:8px;margin-top:4px;"></video><br><a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--green);">⬇ Clip ${i+1}</a>`;
+      }
+    } catch(e) { addMsg('ai',`⚠️ Clip ${i+1} : ${e.message}`); }
+  }
+  setSt('Connecté · prêt');
+}
+function closeCutPopup() { document.getElementById('cut-popup').classList.remove('open'); }
+
+// ============================================================
+// SYSTEM PROMPT
+// ============================================================
+function toggleSys() { sysOpen=!sysOpen; document.getElementById('sysp').classList.toggle('open',sysOpen); }
+function saveSys() {
+  sysp=document.getElementById('sysarea').value.trim();
+  localStorage.setItem('nim_sys',sysp);
+  sysOpen=false; document.getElementById('sysp').classList.remove('open');
+  setSt('System prompt appliqué ✓'); setTimeout(()=>setSt('Connecté · prêt'),2000);
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+// 🔒 SECURITY v4.2 — Échapper HTML pour prévenir XSS
+function escapeHTML(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+// Validation URL : autoriser uniquement https:// (anti-javascript:)
+function safeURL(u) {
+  try {
+    const url = new URL(u, location.origin);
+    return ['https:', 'http:', 'blob:', 'data:'].includes(url.protocol) ? url.href : '#';
+  } catch { return '#'; }
+}
+
+function renderHist() {
+  const l=document.getElementById('hlist');
+  if (!convs.length) { l.innerHTML='<div class="hempty"><div class="he">📭</div><p>Aucune conversation sauvegardée</p></div>'; return; }
+  l.innerHTML=convs.map((c,i)=>{
+    const ts = escapeHTML(c.ts);
+    const model = escapeHTML(c.model);
+    const userTxt = escapeHTML((c.user||'').slice(0,90)) + ((c.user||'').length>90?'…':'');
+    const aiTxt   = escapeHTML((c.ai||'').slice(0,140)) + ((c.ai||'').length>140?'…':'');
+    return `<div class="hcard" onclick="loadConv(${i})" style="cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--bdr)'"><div class="hcard-meta">🕐 ${ts} &nbsp;·&nbsp; 🤖 ${model}</div><div class="hcard-u">👤 ${userTxt}</div><div class="hcard-a">🤖 ${aiTxt}</div><div style="font-size:10px;color:var(--green);margin-top:6px;font-family:'DM Mono',monospace;">Appuyer pour reprendre →</div></div>`;
+  }).join('');
+}
+function loadConv(i) {
+  const c=convs[i]; if(!c) return;
+  showNav('chat');
+  setTimeout(()=>{ addMsg('user',c.user||''); addMsg('ai',c.ai||''); },100);
+}
+function clearHist() { openCon('Effacer l\'historique ?','Toutes les conversations seront supprimées.',()=>{ convs=[]; localStorage.removeItem('nim_convs'); renderHist(); }); }
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSet() {
+  const w=document.getElementById('pcwrap');
+  if (plan==='pro') { w.innerHTML=`<div class="pcard"><div class="pci"><h3>Plan Pro</h3><p>Messages illimités · Claude + fal.ai + Gemini</p></div><div class="pcbp">PRO</div></div>`; }
+  else { w.innerHTML=`<div class="pcard"><div class="pci"><h3>Plan Gratuit</h3><p>${(getUsedTokens()/1000).toFixed(1)}K / 20K tokens · fenêtre 1h</p></div><div class="pcbp fb">FREE</div></div><a href="index.html" style="display:block;background:var(--green);color:#000;font-weight:800;font-size:15px;padding:14px;border-radius:12px;text-align:center;text-decoration:none;margin-bottom:20px;">⚡ Passer en Pro — 29,99€/mois</a>`; }
+  const sel=document.getElementById('msel');
+  if (sel) document.getElementById('smod').textContent=sel.selectedOptions[0]?.text||'';
+  document.getElementById('skey').textContent=ukey||'Plan gratuit (non connecté)';
+  document.getElementById('tsl').value=Math.round(temp*100);
+  document.getElementById('tval').textContent=temp.toFixed(1);
+  document.getElementById('tksel').value=maxTok;
+}
+function updTemp(v) { temp=parseFloat(v)/100; document.getElementById('tval').textContent=temp.toFixed(1); localStorage.setItem('nim_temp',temp); }
+document.addEventListener('change',e=>{ if(e.target.id==='tksel'){maxTok=parseInt(e.target.value);localStorage.setItem('nim_tok',maxTok);} });
+
+// ============================================================
+// ADMIN PANEL
+// ============================================================
+function renderAdmin() {
+  // Préremplir les clés masquées
+  const ak=document.getElementById('admin-anthropic-key');
+  const fk=document.getElementById('admin-fal-key');
+  const gk=document.getElementById('admin-gemini-key');
+  if(ak && CONFIG.ANTHROPIC_API_KEY && !CONFIG.ANTHROPIC_API_KEY.includes('COLLE_TA')) ak.placeholder='••••••••'+CONFIG.ANTHROPIC_API_KEY.slice(-6);
+  if(fk && CONFIG.FAL_API_KEY && !CONFIG.FAL_API_KEY.includes('COLLE_TA')) fk.placeholder='••••••••'+CONFIG.FAL_API_KEY.slice(-6);
+  if(gk && CONFIG.GEMINI_API_KEYS[0]) gk.placeholder='••••••••'+CONFIG.GEMINI_API_KEYS[0].slice(-6);
+  // Barres de conso
+  const claudeBar=document.getElementById('admin-claude-bar');
+  const falBar=document.getElementById('admin-fal-bar');
+  const claudeUsed=document.getElementById('admin-claude-used');
+  const falUsed=document.getElementById('admin-fal-used');
+  if(claudeBar){ const est=(_claudeTokensTotal/1000000)*15; claudeBar.style.width=Math.min(est/50*100,100)+'%'; if(claudeUsed) claudeUsed.textContent='~$'+est.toFixed(3)+' session'; }
+  if(falBar){ falBar.style.width=Math.min(_falCostTotal/10*100,100)+'%'; if(falUsed) falUsed.textContent='~$'+_falCostTotal.toFixed(3)+' session'; }
+}
+
+function nimToast(msg,type,dur){
+  type=type||'success';dur=dur||3000;
+  var t=document.getElementById('nim-toast');
+  if(!t){
+    t=document.createElement('div');t.id='nim-toast';
+    t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#13141F;border:1px solid #4BB896;border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:10px;font-family:Outfit,sans-serif;font-size:14px;font-weight:600;color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:99999;opacity:0;transition:all .3s cubic-bezier(.34,1.1,.64,1);pointer-events:none;white-space:nowrap;max-width:90vw;';
+    document.body.appendChild(t);
+  }
+  var ic={success:'✅',error:'❌',info:'ℹ️',warn:'⚠️'};
+  var co={success:'#4BB896',error:'#FF5B5B',info:'#7ED8B4',warn:'#F5A623'};
+  t.style.borderColor=co[type]||'#4BB896';
+  t.innerHTML='<span style="font-size:18px">'+(ic[type]||'✅')+'</span><span>'+msg+'</span>';
+  t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(t._to);
+  t._to=setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';},dur);
+}
+
+function restoreSavedKeys(){
+  // 🔒 SECURITY v4.2 — Stockage clés API en localStorage SUPPRIMÉ.
+  // Raison : localStorage non chiffré, lisible par toute extension/XSS.
+  // Les clés vivent désormais uniquement dans Supabase Edge Functions.
+  // Nettoyage des anciennes clés potentiellement présentes :
+  try {
+    if (localStorage.getItem('nim_key_anthropic') || localStorage.getItem('nim_key_fal') || localStorage.getItem('nim_key_gemini')) {
+      localStorage.removeItem('nim_key_anthropic');
+      localStorage.removeItem('nim_key_fal');
+      localStorage.removeItem('nim_key_gemini');
+      console.warn('[NIM] Anciennes clés API nettoyées du localStorage. Active USE_PROXY=true dans config.js et déploie les Edge Functions.');
+    }
+  } catch(e) {}
+}
+
+function saveAdminKey(service){
+  // 🔒 SECURITY v4.2 — Cette feature est désactivée.
+  // Les clés ne peuvent plus être saisies côté client.
+  // Pour configurer les clés : Supabase Dashboard → Edge Functions → Secrets
+  nimToast('🔒 Pour modifier les clés API : Supabase Dashboard → Edge Functions → Secrets','warn',5000);
+  // Masquer la section admin keys côté UI
+  ['admin-anthropic-key','admin-fal-key','admin-gemini-key'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value=''; el.disabled=true; el.placeholder='Géré côté serveur (Supabase secrets)'; }
+  });
+}
+
+// ============================================================
+// CONFIRM + LOGOUT
+// ============================================================
+let cb=null;
+function openCon(t,m,fn) { document.getElementById('ctit').textContent=t; document.getElementById('cmsg').textContent=m; cb=fn; document.getElementById('cbg').classList.add('open'); document.getElementById('cokb').onclick=()=>{closeCon();if(cb)cb();}; }
+function closeCon() { document.getElementById('cbg').classList.remove('open'); }
+function doLogout() {
+  openCon('Se déconnecter ?','Tu seras redirigé vers la page de connexion.',async()=>{
+    if(sb) await sb.auth.signOut().catch(()=>{});
+    localStorage.removeItem('nim_plan'); localStorage.removeItem('nim_email');
+    showScr('gate-screen');
+  });
+}
+
+// ============================================================
+// PWA
+// ============================================================
+// ── INSTALL PWA — Nouveau système ──────────────────────────
+function showInstallPopup() {
+  const popup = document.getElementById('instprompt');
+  if (!popup) return;
+  const ua = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+  const isSafari = /safari/.test(ua) && !/chrome/.test(ua) && !/crios/.test(ua);
+  const isStandalone = window.matchMedia('(display-mode:standalone)').matches || navigator.standalone === true;
+  const isMobile = /mobile|android|iphone|ipad|ipod/i.test(ua);
+
+  if (isStandalone) return; // déjà installé
+  if (localStorage.getItem('nim_idm')) return; // dismissé
+
+  const iconEl = document.getElementById('ip-icon');
+  const textEl = document.getElementById('ip-text');
+  const iosEl = document.getElementById('ip-ios');
+
+  if (isIOS && isSafari) {
+    if (iosEl) iosEl.style.display = 'block';
+    if (iconEl) iconEl.textContent = '📋';
+    if (textEl) textEl.textContent = 'Voir les étapes iPhone';
+  } else if (isIOS) {
+    if (iconEl) iconEl.textContent = '🌐';
+    if (textEl) textEl.textContent = 'Ouvrir dans Safari pour installer';
+  } else if (dip) {
+    if (iconEl) iconEl.textContent = '📲';
+    if (textEl) textEl.textContent = 'Installer sur mon téléphone';
+  } else if (!isMobile) {
+    // Desktop : pas de popup intrusif, juste fermer silencieusement
+    return;
+  } else {
+    // Mobile sans prompt natif (Firefox Android, etc.)
+    if (iconEl) iconEl.textContent = '📱';
+    if (textEl) textEl.textContent = 'Ajouter à l\'écran d\'accueil via le menu navigateur';
+  }
+  popup.style.display = 'block';
+}
+
+async function doInstallPWA() {
+  if (dip) {
+    const btn = document.getElementById('ip-btn');
+    btn.innerHTML = '<span>⏳</span><span>Installation en cours…</span>';
+    btn.disabled = true;
+    try {
+      await dip.prompt();
+      const { outcome } = await dip.userChoice;
+      dip = null;
+      if (outcome === 'accepted') {
+        btn.innerHTML = '<span>✅</span><span>Installé ✅</span>';
+        btn.style.background = '#4BB896';
+        setTimeout(() => { hideInstallPopup(); }, 2000);
+      } else {
+        btn.innerHTML = '<span>📲</span><span>Installer maintenant</span>';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.innerHTML = '<span>📲</span><span>Installer maintenant</span>';
+      btn.disabled = false;
+    }
+    return;
+  }
+  // iOS : toggle guide
+  const ios = document.getElementById('ip-ios');
+  if (ios) {
+    ios.style.display = ios.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('ip-text').textContent = ios.style.display === 'block' ? 'Masquer les étapes' : 'Voir les étapes iPhone';
+  }
+}
+
+function skipInstall() {
+  hideInstallPopup();
+  localStorage.setItem('nim_idm', '1');
+}
+
+function hideInstallPopup() {
+  const popup = document.getElementById('instprompt');
+  if (popup) { popup.style.display = 'none'; } // FIX [4d]
+}
+
+// Compatibilité ancien code
+function instApp() { doInstallPWA(); }
+function dismissInst() { skipInstall(); }
+</script>
+<!-- ══ POPUP MISE À JOUR ══ -->
+<div role="dialog" aria-modal="true" id="update-popup" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(8,9,15,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);align-items:flex-end;justify-content:center;">
+  <div style="background:#0F1018;border:1px solid #2C2F3E;border-bottom:none;border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:10px 22px 32px;padding-bottom:max(32px,env(safe-area-inset-bottom));animation:swUpd .3s cubic-bezier(.34,1.1,.64,1);">
+    <div style="width:36px;height:4px;background:#2C2F3E;border-radius:2px;margin:0 auto 18px;"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div style="width:46px;height:46px;background:linear-gradient(135deg,#7ED8B4,#4BB896);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#000;flex-shrink:0;">N</div>
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#F0F2FF;">Mise à jour disponible</div>
+        <div style="font-size:12px;color:#6B7099;margin-top:2px;font-family:'DM Mono',monospace;" id="upd-version">NIM Studio Pro · Nouvelle version</div>
+      </div>
+      <div style="margin-left:auto;background:rgba(126,216,180,.1);border:1px solid rgba(126,216,180,.3);color:#7ED8B4;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;white-space:nowrap;">NOUVEAU</div>
+    </div>
+    <div style="background:#171924;border:1px solid #2C2F3E;border-radius:12px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:#6B7099;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Quoi de neuf</div>
+      <div id="upd-notes" style="font-size:13px;color:#F0F2FF;line-height:1.7;">
+        ✦ Améliorations de performance<br>
+        ✦ Corrections de bugs<br>
+        ✦ Nouveaux modèles disponibles
+      </div>
+    </div>
+    <button onclick="applyUpdate()" style="width:100%;background:#7ED8B4;color:#000;border:none;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;padding:16px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;box-shadow:0 6px 28px rgba(126,216,180,.3);transition:all .15s;">
+      🔄 Installer la mise à jour
+    </button>
+    <button onclick="dismissUpdate()" style="width:100%;background:transparent;color:#6B7099;border:none;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;padding:10px;cursor:pointer;">
+      Plus tard — continuer sans mettre à jour
+    </button>
+  </div>
+</div>
+<style>
+@keyframes swUpd{from{transform:translateY(100%);}to{transform:translateY(0);}}
+</style>
+
+<script>
+// ══════════════════════════════════════════
+// SYSTÈME DE MISE À JOUR
+// ══════════════════════════════════════════
+let _pendingSW = null;
+
+function showUpdatePopup(swWorker, data) {
+  _pendingSW = swWorker;
+  const popup = document.getElementById('update-popup');
+  if (!popup) return;
+  // Afficher la version si dispo
+  if (data?.version) {
+    document.getElementById('upd-version').textContent = 'NIM Studio Pro · Version ' + data.version + (data.date ? ' · ' + data.date : '');
+  }
+  popup.style.display = 'flex';
+}
+
+function applyUpdate() {
+  const popup = document.getElementById('update-popup');
+  if (popup) popup.style.display = 'none';
+  // Envoyer le signal au SW pour qu'il prenne le contrôle
+  if (_pendingSW) {
+    _pendingSW.postMessage({ type: 'SW_SKIP_WAITING' });
+  } else if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'SW_SKIP_WAITING' });
+  } else {
+    window.location.reload();
+  }
+}
+
+function dismissUpdate() {
+  const popup = document.getElementById('update-popup');
+  if (popup) popup.style.display = 'none';
+  // Rappeler dans 1h
+  setTimeout(() => {
+    if (_pendingSW) showUpdatePopup(_pendingSW);
+  }, 60 * 60 * 1000);
+}
+</script>
+
+
+<!-- ══ MODAL UPGRADE STRIPE ══ -->
+<div role="dialog" aria-modal="true" id="upgrade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9998;align-items:flex-end;justify-content:center;">
+  <div style="background:#0F1018;border-radius:24px 24px 0 0;padding:28px 20px 48px;width:100%;max-width:480px;box-shadow:0 -8px 48px rgba(0,0,0,.9);animation:instUp .4s cubic-bezier(.34,1.1,.64,1);">
+    <div style="width:40px;height:4px;background:#2A2D3E;border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:36px;margin-bottom:8px;">⚡</div>
+      <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;font-family:'Outfit',sans-serif;">Passer en Pro</h2>
+      <p style="font-size:13px;color:#6B7099;margin:0;font-family:'Outfit',sans-serif;">Claude illimité &#183; FLUX &#183; Kling &#183; Veo &#183; Support prioritaire</p>
+    </div>
+    <a href="https://buy.stripe.com/8x24gA4wY8oe7J2b8J6sw00" target="_blank" onclick="document.getElementById('upgrade-modal').style.display='none'" style="display:block;background:linear-gradient(135deg,#4BB896,#2D9E72);color:#000;font-weight:800;font-size:16px;padding:17px;border-radius:14px;text-align:center;text-decoration:none;margin-bottom:12px;font-family:'Outfit',sans-serif;box-shadow:0 4px 20px rgba(75,184,150,.4);">
+      &#128179; 29,99&#8364; / mois
+    </a>
+    <a href="https://buy.stripe.com/aFa7sM7JafQG9RaccN6sw02" target="_blank" onclick="document.getElementById('upgrade-modal').style.display='none'" style="display:block;background:#1A1D2E;border:1px solid #4BB896;color:#4BB896;font-weight:800;font-size:16px;padding:17px;border-radius:14px;text-align:center;text-decoration:none;margin-bottom:20px;font-family:'Outfit',sans-serif;">
+      &#127942; Annuel &#8212; &#233;conomise 2 mois
+    </a>
+    <p style="text-align:center;font-size:12px;color:#4B5070;margin:0 0 12px;font-family:'DM Mono',monospace;">Support : <a href="mailto:shopova@gmail.com" style="color:#4BB896;text-decoration:none;">shopova@gmail.com</a></p>
+    <button onclick="document.getElementById('upgrade-modal').style.display='none'" style="width:100%;background:transparent;border:none;color:#6B7099;font-family:'Outfit',sans-serif;font-size:14px;padding:10px;cursor:pointer;">Fermer</button>
+  </div>
+</div>
+<script>
+function openUpgradeModal(){
+  var m=document.getElementById('upgrade-modal');
+  if(m){m.style.display='flex';}
+}
+</script>
+
+<!-- Colle juste avant </body> dans app.html -->
+
+<script>
+// ============================================================
+// 🔒 P0-4 v4.2 — Fermer modals au clavier (Escape)
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  let closed = false;
+  // .modal-overlay.open, .inst-overlay.open, .cbg.open, .popup-bg.open
+  document.querySelectorAll('.modal-overlay.open, .inst-overlay.open, .cbg.open, .popup-bg.open').forEach(m => {
+    m.classList.remove('open');
+    closed = true;
+  });
+  // Modals inline-style (display:flex/block)
+  ['update-popup','upgrade-modal','instprompt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.style.display && el.style.display !== 'none') {
+      el.style.display = 'none';
+      closed = true;
+    }
+  });
+  if (closed) document.body.style.overflow = '';
+});
+
+function openUpgradeModal(){ document.getElementById('upgrade-modal').style.display='flex'; }
+</script>
+</body>
+</html>
