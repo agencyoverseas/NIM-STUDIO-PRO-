@@ -9,7 +9,7 @@ const CONFIG = {
 
   // ── SUPABASE ─────────────────────────────────────────────
   SUPABASE_URL:      "https://exopobvryynqnbfywmta.supabase.co",
-  SUPABASE_ANON_KEY: "REMPLACE_PAR_TA_NOUVELLE_ANON_KEY",
+  SUPABASE_ANON_KEY: "sb_publishable_48Ph9_QfJil7HeNC0MGaxg_PXHwIhla",
 
   // ── ANTHROPIC CLAUDE ──────────────────────────────────────
   // ➕ https://console.anthropic.com → API Keys
